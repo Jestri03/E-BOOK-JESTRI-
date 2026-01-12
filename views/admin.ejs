@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - E-BOOK JESTRI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .admin-container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #007AFF; margin-bottom: 25px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-add { background: #007AFF; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .book-list { width: 100%; border-collapse: collapse; margin-top: 30px; }
+        .book-list td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .btn-delete { background: #FF3B30; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #007AFF; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="admin-container">
+    <h2><i class="fa fa-user-shield"></i> Panel Admin Jestri</h2>
+    <form action="/add-book" method="POST" enctype="multipart/form-data">
+        <label>Judul Buku</label>
+        <input type="text" name="title" required>
+        <label>Penulis</label>
+        <input type="text" name="author" required>
+        <label>Harga</label>
+        <input type="number" name="price" required>
+        <label>Genre</label>
+        <select name="genre">
+            <option>Fiksi</option><option>Edukasi</option><option>Teknologi</option>
+            <option>Bisnis</option><option>Agama</option><option>Komik</option><option>Novel</option>
+        </select>
+        <label>Foto Cover</label>
+        <input type="file" name="img" accept="image/*" required>
+        <button type="submit" class="btn-add">TAMBAHKAN BUKU</button>
+    </form>
+    <table class="book-list">
+        <% books.forEach((book, index) => { %>
+            <tr>
+                <td><strong><%= book.title %></strong></td>
+                <td>
+                    <form action="/delete-book/<%= index %>" method="POST">
+                        <button type="submit" class="btn-delete">Hapus</button>
+                    </form>
+                </td>
+            </tr>
+        <% }) %>
+    </table>
+    <a href="/" class="back-link">← Kembali ke Toko</a>
+</div>
+</body>
+</html>
+
