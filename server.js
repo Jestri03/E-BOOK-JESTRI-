@@ -7,29 +7,27 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Konfigurasi Database Sementara (Vercel menggunakan /tmp)
+// Path Database Sementara di Vercel
 const booksPath = path.join('/tmp', 'books.json');
 if (!fs.existsSync(booksPath)) {
     fs.writeFileSync(booksPath, JSON.stringify([]));
 }
 
-// Pengaturan Tampilan (EJS)
+// PENTING: Pengaturan Folder Views agar tidak Error 500
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
+app.set('views', path.join(process.cwd(), 'views'));
+app.use(express.static(path.join(process.cwd(), 'public')));
 
-// Sesi Admin
+app.use(express.urlencoded({ extended: true }));
 app.use(session({
     secret: 'jestri-secret',
     resave: false,
     saveUninitialized: true
 }));
 
-// Folder Upload Gambar Sementara
 const upload = multer({ dest: '/tmp/' });
 
-// HALAMAN UTAMA - Menampilkan Katalog
+// Route Halaman Utama
 app.get('/', (req, res) => {
     try {
         const books = JSON.parse(fs.readFileSync(booksPath));
@@ -39,7 +37,7 @@ app.get('/', (req, res) => {
     }
 });
 
-// HALAMAN LOGIN ADMIN
+// Route Login
 app.get('/login-admin', (req, res) => {
     res.render('admin-login');
 });
@@ -50,18 +48,18 @@ app.post('/login-admin', (req, res) => {
         req.session.isAdmin = true;
         res.redirect('/admin-dashboard');
     } else {
-        res.send('Password salah! <a href="/login-admin">Kembali</a>');
+        res.send('Password Salah! <a href="/login-admin">Kembali</a>');
     }
 });
 
-// HALAMAN DASHBOARD ADMIN
+// Route Dashboard
 app.get('/admin-dashboard', (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
     const books = JSON.parse(fs.readFileSync(booksPath));
     res.render('admin-dashboard', { books });
 });
 
-// PROSES TAMBAH BUKU
+// Route Tambah Buku
 app.post('/add-book', upload.single('image'), (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
     const { title, price, description } = req.body;
@@ -79,9 +77,9 @@ app.post('/add-book', upload.single('image'), (req, res) => {
     res.redirect('/admin-dashboard');
 });
 
-// PENTING UNTUK VERCEL
+// Export untuk Vercel
 app.listen(PORT, () => {
-    console.log(`Server nyala di port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
 
 module.exports = app;
