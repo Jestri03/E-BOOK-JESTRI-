@@ -3,54 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - E-BOOK JESTRI</title>
+    <title>Admin Panel - E-BOOK JESTRI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        .admin-container { max-width: 500px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #007AFF; margin-bottom: 25px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn-add { background: #007AFF; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .book-list { width: 100%; border-collapse: collapse; margin-top: 30px; }
-        .book-list td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
-        .btn-delete { background: #FF3B30; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
-        .back-link { display: block; text-align: center; margin-top: 20px; color: #007AFF; text-decoration: none; font-weight: bold; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        
+        /* Desain Kotak Login */
+        .login-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
+        .login-card h2 { color: #333; margin-bottom: 25px; }
+        .login-card input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; outline: none; }
+        .login-card input:focus { border-color: #007bff; }
+        .btn-login { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-login:hover { background: #0056b3; }
+        
+        /* Tampilan Dashboard (Jika sudah login) */
+        .dashboard-container { background: white; width: 90%; max-width: 800px; padding: 20px; border-radius: 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
-<div class="admin-container">
-    <h2><i class="fa fa-user-shield"></i> Panel Admin Jestri</h2>
-    <form action="/add-book" method="POST" enctype="multipart/form-data">
-        <label>Judul Buku</label>
-        <input type="text" name="title" required>
-        <label>Penulis</label>
-        <input type="text" name="author" required>
-        <label>Harga</label>
-        <input type="number" name="price" required>
-        <label>Genre</label>
-        <select name="genre">
-            <option>Fiksi</option><option>Edukasi</option><option>Teknologi</option>
-            <option>Bisnis</option><option>Agama</option><option>Komik</option><option>Novel</option>
-        </select>
-        <label>Foto Cover</label>
-        <input type="file" name="img" accept="image/*" required>
-        <button type="submit" class="btn-add">TAMBAHKAN BUKU</button>
-    </form>
-    <table class="book-list">
-        <% books.forEach((book, index) => { %>
-            <tr>
-                <td><strong><%= book.title %></strong></td>
-                <td>
-                    <form action="/delete-book/<%= index %>" method="POST">
-                        <button type="submit" class="btn-delete">Hapus</button>
-                    </form>
-                </td>
-            </tr>
-        <% }) %>
-    </table>
-    <a href="/" class="back-link">← Kembali ke Toko</a>
-</div>
+
+    <% if (mode === 'login') { %>
+        <div class="login-card">
+            <i class="fa fa-user-shield" style="font-size: 50px; color: #007bff; margin-bottom: 15px;"></i>
+            <h2>Admin Login</h2>
+            <form action="/login-admin" method="POST">
+                <input type="password" name="password" placeholder="Masukkan Password" required autofocus>
+                <button type="submit" class="btn-login">MASUK</button>
+            </form>
+            <p style="font-size: 12px; color: #777; margin-top: 15px;">E-BOOK JESTRI Panel</p>
+        </div>
+    <% } else { %>
+        <div class="dashboard-container">
+            <h2>Panel Kelola Buku</h2>
+            <p>Selamat datang, Admin! Gunakan form di bawah untuk tambah buku.</p>
+            <a href="/logout" style="color: red; text-decoration: none; font-weight: bold;">Logout</a>
+        </div>
+    <% } %>
+
 </body>
 </html>
 
