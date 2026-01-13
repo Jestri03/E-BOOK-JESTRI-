@@ -1,15 +1,16 @@
 const express = require('express');
 const path = require('path');
-const multer = require('multer');
 const app = express();
 
-const upload = multer({ dest: 'public/uploads/' });
-
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
-let BOOKS = []; // Data buku sementara
+// Database Buku Sementara (Disimpan di RAM)
+let BOOKS = [
+    { id: 1, title: "Tan Malaka - MADILOG", author: "Rowland Book", price: "2.700", image: "https://via.placeholder.com/150" }
+];
 
 app.get('/', (req, res) => {
     res.render('index', { books: BOOKS });
@@ -27,16 +28,17 @@ app.post('/admin-dashboard', (req, res) => {
     }
 });
 
-app.post('/add-book', upload.single('image'), (req, res) => {
-    const { title, author, price } = req.body;
+// Tambah Buku menggunakan Link URL Gambar (Agar Vercel tidak Error 500)
+app.post('/add-book', (req, res) => {
+    const { title, author, price, imageUrl } = req.body;
     BOOKS.push({
         id: Date.now(),
-        title,
-        author,
-        price, // Tersimpan sebagai string (teks)
-        image: req.file ? `/uploads/${req.file.filename}` : "https://via.placeholder.com/150"
+        title: title,
+        author: author,
+        price: price, 
+        image: imageUrl || "https://via.placeholder.com/150"
     });
-    res.redirect('/jestri-control');
+    res.send("<script>alert('Buku Berhasil Ditambah!'); window.location='/jestri-control';</script>");
 });
 
 app.get('/delete-book/:id', (req, res) => {
