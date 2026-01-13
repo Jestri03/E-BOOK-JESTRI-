@@ -7,74 +7,60 @@ const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Database sementara untuk Vercel
 const booksPath = path.join('/tmp', 'books.json');
 if (!fs.existsSync(booksPath)) fs.writeFileSync(booksPath, JSON.stringify([]));
 
-// Konfigurasi View Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
-// Sesi Login Admin
+// PENTING: Pengaturan Sesi Login
 app.use(session({
-    secret: 'jestri-secret-key',
+    secret: 'jestri-keamanan-tinggi',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false, // Diubah ke false agar lebih aman
+    cookie: { maxAge: 3600000 } // Sesi aktif selama 1 jam
 }));
 
 const upload = multer({ dest: '/tmp/' });
 
-// --- ROUTES ---
-
-// 1. Halaman Utama (TIDAK DIUBAH)
+// 1. Halaman Utama (TIDAK BERUBAH)
 app.get('/', (req, res) => {
     const books = JSON.parse(fs.readFileSync(booksPath));
     res.render('index', { books });
 });
 
-// 2. Halaman Login Admin (Menggunakan admin.ejs)
+// 2. Proses Login
 app.get('/login-admin', (req, res) => {
     res.render('admin', { mode: 'login', books: [] }); 
 });
 
 app.post('/login-admin', (req, res) => {
+    // Password kamu: jestri123
     if (req.body.password === 'jestri123') {
-        req.session.isAdmin = true;
+        req.session.isAdmin = true; // Tandai sudah login
         return res.redirect('/admin-dashboard');
     }
-    res.send('Password salah! <a href="/login-admin">Kembali</a>');
+    res.send('Password salah! <a href="/login-admin">Coba lagi</a>');
 });
 
-// 3. Halaman Dashboard Admin (Menggunakan admin.ejs)
+// 3. Proteksi Dashboard (Kunci agar tidak langsung terbuka)
 app.get('/admin-dashboard', (req, res) => {
-    if (!req.session.isAdmin) return res.redirect('/login-admin');
-    const books = JSON.parse(fs.readFileSync(booksPath));
-    res.render('admin', { mode: 'dashboard', books }); 
+    if (req.session.isAdmin === true) {
+        const books = JSON.parse(fs.readFileSync(booksPath));
+        return res.render('admin', { mode: 'dashboard', books }); 
+    } else {
+        // Jika belum login, paksa ke halaman login
+        return res.redirect('/login-admin');
+    }
 });
 
-// 4. Fitur Tambah Buku
-app.post('/add-book', upload.single('image'), (req, res) => {
-    if (!req.session.isAdmin) return res.redirect('/login-admin');
-    const books = JSON.parse(fs.readFileSync(booksPath));
-    books.push({
-        id: Date.now(),
-        title: req.body.title,
-        price: req.body.price,
-        description: req.body.description,
-        image: req.file ? req.file.filename : ''
-    });
-    fs.writeFileSync(booksPath, JSON.stringify(books));
-    res.redirect('/admin-dashboard');
-});
-
-// 5. Logout
 app.get('/logout', (req, res) => {
     req.session.destroy();
-    res.redirect('/');
+    res.redirect('/login-admin');
 });
 
-app.listen(PORT, () => console.log('Server Mode Admin Aktif'));
+app.listen(PORT, () => console.log('Sistem Keamanan Aktif'));
 module.exports = app;
 
