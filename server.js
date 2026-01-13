@@ -3,33 +3,33 @@ const session = require('express-session');
 const path = require('path');
 const app = express();
 
-// Middleware Dasar
+// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Konfigurasi Session agar Admin tidak mental ke Login
+// Konfigurasi Session (Kunci Utama Fix Logout)
 app.use(session({
     secret: 'jestri-secret-key-123',
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: false, // Set false karena Vercel pakai proxy
-        maxAge: 3600000 
+        secure: false, // Karena Vercel menggunakan HTTPS proxy
+        maxAge: 3600000 // 1 Jam
     }
 }));
 
 // ==========================================
-// 1. MODE PEMBELI (TIDAK DIUBAH - SESUAI VIDEO)
+// 1. MODE PEMBELI (TAMPILAN UTAMA / INDEX)
 // ==========================================
 app.get('/', (req, res) => {
-    // Menampilkan halaman utama (Menu Genre, Fiksi, Teknologi, dll)
-    res.render('index'); 
+    // Menampilkan halaman sesuai video (Menu Genre)
+    res.render('index', { buku: [] }); 
 });
 
 // ==========================================
-// 2. MODE ADMIN (FIX ERROR CANNOT GET/POST)
+// 2. MODE ADMIN (PERBAIKAN LOGIKA)
 // ==========================================
 
 // Halaman Login
@@ -51,23 +51,21 @@ app.post('/admin-dashboard', (req, res) => {
 // Dashboard Admin (Fix error: Cannot GET /jestri-control)
 app.get('/jestri-control', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
-    // 'buku' harus dikirim (meski kosong) agar admin.ejs tidak crash
+    // Pastikan data 'buku' dikirim agar admin.ejs tidak crash
     res.render('admin', { buku: [] }); 
 });
 
-// Tambah Buku (KUNCI: Tetap di Dashboard Admin)
+// Tambah Buku (Fix: Tetap di Dashboard)
 app.post('/tambah-buku', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
-    
-    // Logika database Anda di sini (misal simpan ke MongoDB/MySQL)
-    
-    // Redirect kembali ke dashboard admin, BUKAN ke login
-    res.redirect('/jestri-control');
+    // Logika simpan DB Anda di sini...
+    res.redirect('/jestri-control'); // Balik ke dashboard, bukan login
 });
 
 // Hapus Buku
 app.get('/hapus-buku/:id', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
+    // Logika hapus DB Anda di sini...
     res.redirect('/jestri-control');
 });
 
@@ -77,7 +75,6 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-// Server Listen
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server nyala di port ${PORT}`));
 
