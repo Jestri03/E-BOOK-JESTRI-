@@ -1,7 +1,6 @@
 {
-  "name": "ebook-jestri",
+  "name": "jestri-ebook",
   "version": "1.0.0",
-  "description": "E-book store",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -13,3 +12,4 @@
     "pdf-lib": "^1.17.1"
   }
 }
+
