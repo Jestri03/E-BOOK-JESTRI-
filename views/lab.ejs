@@ -2,30 +2,28 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JESTRI WATERMARK LAB</title>
+    <title>WATERMARK LAB - JESTRI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .lab-box { background: #2d2d2d; width: 90%; max-width: 450px; padding: 30px; border-radius: 20px; border: 2px dashed #007bff; text-align: center; }
-        .icon { font-size: 50px; color: #007bff; margin-bottom: 20px; }
-        input[type="file"] { background: #3d3d3d; padding: 20px; width: 100%; border-radius: 10px; margin: 20px 0; color: white; }
-        .btn-lab { background: #007bff; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .info { font-size: 12px; color: #aaa; margin-top: 15px; }
+        body { font-family: sans-serif; background: #121212; color: white; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .lab-box { background: #1e1e1e; padding: 30px; border-radius: 20px; border: 2px solid #007bff; text-align: center; width: 85%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .icon { font-size: 50px; color: #007bff; margin-bottom: 15px; }
+        input[type="file"] { margin: 20px 0; background: #2a2a2a; padding: 15px; border-radius: 10px; width: 100%; box-sizing: border-box; color: white; border: 1px solid #333; }
+        .btn { background: #007bff; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #0056b3; }
+        .back { display: block; margin-top: 20px; color: #888; text-decoration: none; font-size: 13px; }
     </style>
 </head>
 <body>
     <div class="lab-box">
         <div class="icon"><i class="fa fa-flask"></i></div>
-        <h2>WATERMARK LAB</h2>
-        <p>Masukkan PDF asli untuk memberi tanda <br><strong>"E-BOOK JESTRI"</strong></p>
-        
-        <form action="/process-pdf" method="POST" enctype="multipart/form-data">
-            <input type="file" name="pdfFile" accept="application/pdf" required>
-            <button type="submit" class="btn-lab">PROSES & DOWNLOAD</button>
+        <h2>Watermark Lab</h2>
+        <p style="color:#aaa; font-size: 14px;">Tambahkan tanda <b>"E-BOOK JESTRI"</b> pada file PDF kamu.</p>
+        <form>
+            <input type="file" accept="application/pdf">
+            <button type="button" class="btn" onclick="alert('Lab Terhubung! Fitur proses sedang disiapkan.')">PROSES PDF</button>
         </form>
-
-        <p class="info"><i class="fa fa-shield-alt"></i> Watermark akan muncul otomatis di setiap halaman PDF.</p>
-        <a href="/" style="color: #555; text-decoration: none; font-size: 12px; display: block; margin-top: 20px;">Kembali ke Beranda</a>
+        <a href="/" class="back">← Kembali ke Beranda</a>
     </div>
 </body>
 </html>
