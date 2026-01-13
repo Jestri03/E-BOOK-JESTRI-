@@ -6,36 +6,31 @@
     <title>E-BOOK JESTRI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; text-align: center; }
+        body { font-family: sans-serif; margin: 0; text-align: center; }
         .header { padding: 20px; }
         .btn-donate { background: #ff4d4d; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 0; }
         
-        /* CSS AGAR TOMBOL PRESISI */
-        .search-container { 
-            display: flex; 
-            max-width: 90%; 
-            width: 400px; 
-            margin: 20px auto; 
-            border: 2px solid #333; 
-            border-radius: 10px; 
-            overflow: hidden; 
-        }
-        .search-container input { 
-            flex: 1; 
-            padding: 12px; 
-            border: none; 
-            outline: none; 
-            font-size: 16px; 
-        }
-        .search-container button { 
-            background: #333; 
-            color: white; 
-            border: none; 
-            padding: 0 20px; 
-            cursor: pointer; 
+        /* CSS TOMBOL PRESISI */
+        .search-wrapper {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            max-width: 400px;
+            margin: 20px auto;
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .search-wrapper input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            outline: none;
+        }
+        .search-wrapper button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -43,10 +38,9 @@
     <div class="header">
         <h2>E-BOOK JESTRI</h2>
         <a href="#" class="btn-donate">❤️ DONATE</a>
-        
-        <div class="search-container">
+        <div class="search-wrapper">
             <input type="text" placeholder="Cari buku...">
-            <button type="submit"><i class="fa fa-search"></i></button>
+            <button><i class="fa fa-search"></i></button>
         </div>
     </div>
 </body>

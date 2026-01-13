@@ -1,12 +1,12 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const multer = require('multer');
 const session = require('express-session');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Path database sementara
 const booksPath = path.join('/tmp', 'books.json');
 if (!fs.existsSync(booksPath)) fs.writeFileSync(booksPath, JSON.stringify([]));
 
@@ -14,21 +14,17 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
-app.use(session({ secret: 'jestri-secret', resave: false, saveUninitialized: true }));
-
-const upload = multer({ dest: '/tmp/' });
+app.use(session({ secret: 'jestri-key', resave: false, saveUninitialized: true }));
 
 // HALAMAN UTAMA
 app.get('/', (req, res) => {
-    try {
-        const books = JSON.parse(fs.readFileSync(booksPath));
-        res.render('index', { books });
-    } catch (err) { res.render('index', { books: [] }); }
+    const books = JSON.parse(fs.readFileSync(booksPath));
+    res.render('index', { books });
 });
 
-// LOGIN ADMIN (Menggunakan admin.ejs sesuai file kamu)
+// LOGIN ADMIN (Menggunakan file admin.ejs yang ada di folder views kamu)
 app.get('/login-admin', (req, res) => {
-    res.render('admin'); 
+    res.render('admin', { books: [] }); 
 });
 
 app.post('/login-admin', (req, res) => {
@@ -43,10 +39,9 @@ app.post('/login-admin', (req, res) => {
 app.get('/admin-dashboard', (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
     const books = JSON.parse(fs.readFileSync(booksPath));
-    // Kita gunakan admin.ejs juga atau buat file baru
-    res.render('admin', { books, mode: 'dashboard' }); 
+    res.render('admin', { books }); 
 });
 
-app.listen(PORT, () => console.log('Server Ready'));
+app.listen(PORT, () => console.log('Server Active'));
 module.exports = app;
 
