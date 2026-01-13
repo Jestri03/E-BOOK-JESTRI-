@@ -3,69 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-BOOK JESTRI</title>
+    <title>E-BOOK JESTRI | Toko Buku Digital</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #ffffff; padding-bottom: 100px; }
+        :root { --primary: #007bff; --danger: #ff4d4d; --success: #25d366; --dark: #333; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background-color: #ffffff; padding-bottom: 100px; -webkit-tap-highlight-color: transparent; }
         
-        /* Navbar & Sidebar */
-        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
-        .btn-menu { background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .brand-title { font-size: 18px; font-weight: bold; flex-grow: 1; text-align: center; margin-right: 60px; }
-        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: white; overflow-x: hidden; transition: 0.3s; box-shadow: 2px 0 15px rgba(0,0,0,0.1); }
-        .sidebar .close-btn { font-size: 30px; color: red; padding: 10px 20px; cursor: pointer; display: block; text-align: right; }
-        .menu-item { padding: 15px 25px; text-decoration: none; font-size: 16px; color: #333; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f1f1f1; }
-        .genre-label { padding: 15px 25px 5px; font-size: 12px; font-weight: bold; color: #007bff; text-transform: uppercase; }
+        /* Navbar */
+        .navbar { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; height: 60px; box-sizing: border-box; }
+        .btn-menu { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .brand-title { font-size: 18px; font-weight: 800; flex-grow: 1; text-align: center; margin-right: 60px; letter-spacing: 1px; }
+
+        /* Sidebar Anti-Delay */
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2001; top: 0; left: 0; background-color: white; overflow-x: hidden; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 2px 0 15px rgba(0,0,0,0.1); }
+        .sidebar .close-btn { font-size: 32px; color: var(--danger); padding: 15px 20px; cursor: pointer; display: block; text-align: right; }
+        .menu-item { padding: 15px 25px; text-decoration: none; font-size: 16px; color: var(--dark); display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f8f9fa; transition: 0.2s; }
+        .menu-item:active { background: #f1f1f1; }
+        .genre-label { padding: 20px 25px 10px; font-size: 11px; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Overlay Background saat Sidebar buka */
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; backdrop-filter: blur(2px); }
 
         /* Donate & Search */
-        .donate-section { text-align: center; padding: 20px 0; }
-        .btn-donate { background: #ff4d4d; color: white; padding: 10px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
-        .search-title { text-align: center; font-weight: bold; margin-bottom: 10px; color: #333; }
-        .search-box { display: flex; max-width: 350px; margin: 0 auto 30px; border: 2px solid #333; border-radius: 8px; overflow: hidden; background: white; }
-        .search-box input { flex: 1; padding: 12px; border: none; outline: none; }
-        .search-box button { background: #333; color: white; border: none; padding: 0 15px; }
+        .donate-section { text-align: center; padding: 25px 0 15px; }
+        .btn-donate { background: var(--danger); color: white; padding: 12px 35px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(255,77,77,0.3); transition: 0.3s; }
+        .btn-donate:active { transform: scale(0.95); }
+        .search-title { text-align: center; font-weight: bold; margin-bottom: 12px; color: var(--dark); font-size: 15px; }
+        .search-box { display: flex; max-width: 350px; margin: 0 auto 25px; border: 2.5px solid var(--dark); border-radius: 10px; overflow: hidden; background: white; }
+        .search-box input { flex: 1; padding: 12px 15px; border: none; outline: none; font-size: 15px; }
+        .search-box button { background: var(--dark); color: white; border: none; padding: 0 15px; cursor: pointer; }
 
-        /* Book Grid */
+        /* Book Grid Optimized */
         .book-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
-        .book-card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden; display: flex; flex-direction: column; border: 1px solid #eee; }
-        .book-card img { width: 100%; height: 210px; object-fit: cover; }
-        .book-info { padding: 10px; text-align: center; }
-        .book-title { font-size: 14px; font-weight: bold; margin-bottom: 5px; height: 38px; overflow: hidden; }
-        .book-price { color: #007bff; font-weight: bold; font-size: 15px; margin-bottom: 10px; }
-        .btn-buy { background: #25d366; color: white; border: none; width: 100%; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 5px; display: flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; }
+        .book-card { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.06); overflow: hidden; border: 1px solid #eee; display: flex; flex-direction: column; }
+        .book-card img { width: 100%; height: 210px; object-fit: cover; background: #f0f0f0; }
+        .book-info { padding: 12px; text-align: center; display: flex; flex-direction: column; flex-grow: 1; }
+        .book-title { font-size: 14px; font-weight: bold; margin-bottom: 6px; color: #222; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .book-price { color: var(--primary); font-weight: 800; font-size: 16px; margin-bottom: 12px; }
+        .btn-buy { background: var(--success); color: white; border: none; width: 100%; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
+        .btn-buy:active { background: #1eb954; transform: scale(0.98); }
 
-        /* Floating Social Icons */
-        .footer-social { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
-        .social-icon { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        /* Floating Social Icons (Strong System) */
+        .footer-social { position: fixed; bottom: 25px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 1000; }
+        .social-icon { width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; text-decoration: none; box-shadow: 0 6px 15px rgba(0,0,0,0.2); transition: 0.3s; }
+        .social-icon:active { transform: translateY(-5px); }
         .ig-icon { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
-        .wa-icon { background: #25d366; }
+        .wa-icon { background: var(--success); }
     </style>
 </head>
 <body>
 
+    <div id="overlay" onclick="closeNav()"></div>
+
     <div id="mySidebar" class="sidebar">
         <span class="close-btn" onclick="closeNav()">&times;</span>
         <a href="/" class="menu-item"><i class="fa fa-home"></i> Rumah</a>
-        <div class="genre-label">GENRE</div>
-        <a href="/?genre=Semua Buku" class="menu-item">Semua Buku</a>
-        <a href="/?genre=Fiksi" class="menu-item">Fiksi</a>
-        <a href="/?genre=Edukasi" class="menu-item">Edukasi</a>
-        <a href="/?genre=Teknologi" class="menu-item">Teknologi</a>
-        <a href="/?genre=Bisnis" class="menu-item">Bisnis</a>
+        <div class="genre-label">Kategori E-Book</div>
+        <a href="/?genre=Semua Buku" class="menu-item"><i class="fa fa-book-open"></i> Semua Buku</a>
+        <a href="/?genre=Fiksi" class="menu-item"><i class="fa fa-ghost"></i> Fiksi</a>
+        <a href="/?genre=Edukasi" class="menu-item"><i class="fa fa-graduation-cap"></i> Edukasi</a>
+        <a href="/?genre=Teknologi" class="menu-item"><i class="fa fa-laptop-code"></i> Teknologi</a>
+        <a href="/?genre=Bisnis" class="menu-item"><i class="fa fa-chart-line"></i> Bisnis</a>
     </div>
 
     <div class="navbar">
-        <button class="btn-menu" onclick="openNav()">Menu</button>
+        <button class="btn-menu" onclick="openNav()"><i class="fa fa-bars"></i> Menu</button>
         <div class="brand-title">E-BOOK JESTRI</div>
     </div>
 
     <div class="donate-section">
-        <a href="https://link.dana.id/qr/8u8o6t3" class="btn-donate"><i class="fa fa-heart"></i> DONATE</a>
+        <a href="https://link.dana.id/qr/8u8o6t3" class="btn-donate"><i class="fa fa-heart"></i> DONATE KE JESTRI</a>
     </div>
 
-    <div class="search-title">Cari Buku / Penulis</div>
+    <div class="search-title">Cari Koleksi E-Book</div>
     <form action="/" method="GET" class="search-box">
-        <input type="text" name="search" placeholder="Ketik judul buku...">
+        <input type="text" name="search" placeholder="Cari judul atau penulis..." autocomplete="off">
         <button type="submit"><i class="fa fa-search"></i></button>
     </form>
 
@@ -73,7 +85,7 @@
         <% if (books && books.length > 0) { %>
             <% books.forEach(book => { %>
                 <div class="book-card">
-                    <img src="/uploads/<%= book.image %>" alt="Cover">
+                    <img src="/uploads/<%= book.image %>" alt="E-Book Cover" onerror="this.src='https://via.placeholder.com/200x300?text=No+Cover'">
                     <div class="book-info">
                         <div class="book-title"><%= book.title %></div>
                         <div class="book-price">Rp <%= book.price %></div>
@@ -84,7 +96,10 @@
                 </div>
             <% }) %>
         <% } else { %>
-            <div style="grid-column: span 2; text-align: center; padding: 50px; color: #888;">Belum ada koleksi buku.</div>
+            <div style="grid-column: span 2; text-align: center; padding: 60px 20px; color: #bbb;">
+                <i class="fa fa-book-open" style="font-size: 40px; margin-bottom: 10px;"></i>
+                <p>Belum ada buku tersedia untuk kategori ini.</p>
+            </div>
         <% } %>
     </div>
 
@@ -98,14 +113,24 @@
     </div>
 
     <script>
-        function openNav() { document.getElementById("mySidebar").style.width = "260px"; }
-        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+        // Fungsi Sidebar Anti-Delay & Lebih Smooth
+        function openNav() {
+            document.getElementById("mySidebar").style.width = "260px";
+            document.getElementById("overlay").style.display = "block";
+        }
 
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        // Fungsi Order WhatsApp Otomatis dengan Pesan Sesuai Permintaan
         function orderWhatsApp(judul, penulis, harga) {
-            const phone = "6285189415489";
-            const message = `🛒 *ORDER E-BOOK JESTRI*\n\n📖 *JUDUL:* ${judul}\n✍️ *PENULIS:* ${penulis}\n💰 *HARGA:* Rp ${harga}\n\nSaya ingin membeli ebook ini. Mohon info cara pembayaran.`;
-            const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-            window.open(url, '_blank');
+            const phoneNumber = "6285189415489";
+            const message = `🛒 *ORDER E-BOOK JESTRI*\n\n📖 *JUDUL:* ${judul}\n✍️ *PENULIS:* ${penulis || 'Admin'}\n💰 *HARGA:* Rp ${harga}\n\nSaya ingin membeli ebook ini. Mohon info cara pembayaran.`;
+            
+            const waUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(waUrl, '_blank');
         }
     </script>
 </body>
