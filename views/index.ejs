@@ -37,12 +37,11 @@
 </head>
 <body>
 
-    <div class="sidebar" id="sidebar">
-        <a href="/"><i class="fa fa-home"></i> Beranda</a>
-        <a href="/login-admin"><i class="fa fa-user-shield"></i> Admin Panel</a>
-        <a href="https://wa.me/6285189415489"><i class="fa fa-headset"></i> Hubungi Kami</a>
-    </div>
-    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <% } else if (mode === 'katalog') { %>
+    <h2>Manajemen E-Book</h2>
+    <a href="/jestri-control" style="display:block; margin-top:20px; color:#007bff; text-decoration:none;">Kembali ke Menu Admin</a>
+<% } %>
+
 
     <div class="header">
         <i class="fa fa-bars menu-icon" onclick="toggleMenu()"></i>

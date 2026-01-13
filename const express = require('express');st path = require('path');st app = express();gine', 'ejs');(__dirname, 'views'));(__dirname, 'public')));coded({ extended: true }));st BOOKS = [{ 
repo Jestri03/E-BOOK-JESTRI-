@@ -1,19 +1,26 @@
-chology of Money", 
+ of Money", 
     price: "2.800", 
     image: "https://i.ibb.co/LzNfXf0/1000715150.jpg",
     description: "Penulis: Morgan Housel"
 }];
 
+// HALAMAN PEMBELI (Hanya Katalog)
 app.get('/', (req, res) => res.render('index', { books: BOOKS }));
-app.get('/login-admin', (req, res) => res.render('admin', { mode: 'login' }));
+
+// LINK RAHASIA ADMIN (Ganti /login-admin jadi ini)
+app.get('/jestri-control', (req, res) => {
+    res.render('admin', { mode: 'login' });
+});
+
 app.post('/admin-dashboard', (req, res) => {
     if (req.body.password === 'JESTRI0301209') {
         res.render('admin', { mode: 'menu-selection' });
     } else {
-        res.send("<script>alert('Salah!'); window.location='/login-admin';</script>");
+        res.send("<script>alert('Akses Ditolak!'); window.location='/jestri-control';</script>");
     }
 });
+
 app.get('/admin/katalog', (req, res) => res.render('admin', { mode: 'katalog', books: BOOKS }));
 
 module.exports = app;
-
+	
