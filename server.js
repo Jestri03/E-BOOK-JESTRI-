@@ -9,19 +9,17 @@ const { PDFDocument, rgb, degrees } = require('pdf-lib');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// PERBAIKAN: Memastikan folder /tmp siap digunakan sebelum aplikasi jalan
+// PERBAIKAN: Penanganan database agar tidak Internal Server Error
 const booksPath = path.join('/tmp', 'books.json');
-const securityLogPath = path.join('/tmp', 'security_audit.log');
+const logPath = path.join('/tmp', 'security_audit.log');
 
-function initializeData() {
+const ensureFilesExist = () => {
     try {
         if (!fs.existsSync(booksPath)) fs.writeFileSync(booksPath, JSON.stringify([]));
-        if (!fs.existsSync(securityLogPath)) fs.writeFileSync(securityLogPath, '--- LOG KEAMANAN JESTRI ---\n');
-    } catch (err) {
-        console.error("Gagal inisialisasi file:", err);
-    }
-}
-initializeData();
+        if (!fs.existsSync(logPath)) fs.writeFileSync(logPath, '--- LOG ---');
+    } catch (e) { console.error("File Init Error"); }
+};
+ensureFilesExist();
 
 app.use(compression());
 app.set('view engine', 'ejs');
@@ -29,10 +27,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// PERBAIKAN: Sesi dibuat lebih simpel agar tidak memicu "Forbidden" di Vercel
+// PERBAIKAN: Sesi distabilkan agar tidak "Forbidden" saat upload PDF
 app.use(session({
-    secret: 'jestri-core-secret-2026',
-    resave: false,
+    secret: 'jestri-secret-core',
+    resave: true,
     saveUninitialized: true,
     cookie: { secure: false, maxAge: 3600000 }
 }));
@@ -40,35 +38,14 @@ app.use(session({
 const upload = multer({ dest: '/tmp/' });
 app.use('/uploads', express.static('/tmp'));
 
-// Fungsi Watermark
-async function prosesWatermark(inputPath, originalName) {
-    const bytes = fs.readFileSync(inputPath);
-    const pdfDoc = await PDFDocument.load(bytes);
-    const pages = pdfDoc.getPages();
-    pages.forEach((page) => {
-        const { width, height } = page.getSize();
-        page.drawText('E-BOOK JESTRI', {
-            x: width / 5, y: height / 2.5, size: 55,
-            color: rgb(0.8, 0.8, 0.8), opacity: 0.3, rotate: degrees(45),
-        });
-    });
-    const pdfBytes = await pdfDoc.save();
-    const outputPath = path.join('/tmp', 'SECURED_' + originalName);
-    fs.writeFileSync(outputPath, pdfBytes);
-    return outputPath;
-}
-
-// --- ROUTES (Tampilan Tidak Berubah) ---
+// --- ROUTES (Tampilan Tetap Sama) ---
 
 app.get('/', (req, res) => {
+    ensureFilesExist();
     try {
-        // PERBAIKAN: Tambahan pengecekan agar tidak "Internal Server Error" jika file kosong
-        if (!fs.existsSync(booksPath)) initializeData();
         const data = fs.readFileSync(booksPath, 'utf8');
         res.render('index', { books: JSON.parse(data || "[]") });
-    } catch (e) { 
-        res.render('index', { books: [] }); 
-    }
+    } catch (e) { res.render('index', { books: [] }); }
 });
 
 app.get('/login-admin', (req, res) => res.render('admin', { mode: 'login' }));
@@ -76,46 +53,50 @@ app.get('/login-admin', (req, res) => res.render('admin', { mode: 'login' }));
 app.post('/login-admin', (req, res) => {
     if (req.body.password === 'JESTRI0301209') {
         req.session.isAdmin = true;
-        // Simpan sesi sebelum redirect untuk cegah Forbidden
+        // PERBAIKAN: Paksa simpan sesi sebelum pindah halaman
         req.session.save(() => res.redirect('/admin-dashboard'));
     } else {
-        res.send('<script>alert("Password Salah!"); window.location="/login-admin";</script>');
+        res.send('<script>alert("Salah!"); window.location="/login-admin";</script>');
     }
 });
 
 app.get('/admin-dashboard', (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
+    ensureFilesExist();
     try {
-        if (!fs.existsSync(booksPath)) initializeData();
         const data = fs.readFileSync(booksPath, 'utf8');
         res.render('admin', { mode: 'dashboard', books: JSON.parse(data || "[]") });
-    } catch (e) {
-        res.render('admin', { mode: 'dashboard', books: [] });
-    }
+    } catch (e) { res.render('admin', { mode: 'dashboard', books: [] }); }
 });
 
+// PERBAIKAN: Route Watermark (Fokus Anti-Forbidden)
 app.post('/secure-pdf', upload.single('pdfFile'), async (req, res) => {
-    if (!req.session.isAdmin) return res.status(403).send("Sesi berakhir, login ulang.");
-    if (!req.file) return res.send("File PDF belum dipilih!");
+    if (!req.session.isAdmin) return res.status(403).send("Forbidden: Login Ulang");
+    if (!req.file) return res.send("File PDF kosong!");
     try {
-        const securedPath = await prosesWatermark(req.file.path, req.file.originalname);
-        res.download(securedPath);
-    } catch (err) { res.send("Gagal memproses PDF."); }
+        const bytes = fs.readFileSync(req.file.path);
+        const pdfDoc = await PDFDocument.load(bytes);
+        const pages = pdfDoc.getPages();
+        pages.forEach(p => p.drawText('E-BOOK JESTRI', { x: 50, y: 50, size: 50, opacity: 0.3 }));
+        
+        const pdfBytes = await pdfDoc.save();
+        const out = path.join('/tmp', 'SECURED_' + req.file.originalname);
+        fs.writeFileSync(out, pdfBytes);
+        res.download(out);
+    } catch (err) { res.status(500).send("Gagal proses PDF"); }
 });
 
 app.get('/cek-keamanan-jestri', (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
-    try {
-        const logs = fs.readFileSync(securityLogPath, 'utf8');
-        res.send(`<pre>${logs}</pre>`);
-    } catch (e) { res.send("Log belum tersedia."); }
+    ensureFilesExist();
+    res.send(`<pre>${fs.readFileSync(logPath, 'utf8')}</pre>`);
 });
 
 app.post('/add-book', upload.single('image'), (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
+    ensureFilesExist();
     try {
-        const data = fs.readFileSync(booksPath, 'utf8');
-        const books = JSON.parse(data || "[]");
+        const books = JSON.parse(fs.readFileSync(booksPath, 'utf8') || "[]");
         books.push({
             id: Date.now(), title: req.body.title, genre: req.body.genre,
             price: req.body.price, description: req.body.description || 'Admin',
@@ -131,6 +112,6 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.listen(PORT, () => console.log('Server Ready'));
+app.listen(PORT, () => console.log('Fixed'));
 module.exports = app;
 
