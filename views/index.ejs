@@ -6,59 +6,87 @@
     <title>E-BOOK JESTRI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; margin: 0; padding-bottom: 70px; text-align: center; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding-bottom: 80px; background-color: #f8f9fa; }
         
-        /* Navigasi Atas */
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px; }
-        .btn-menu { background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        
-        .header { padding: 10px; }
-        .btn-donate { background: #ff4d4d; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        
-        /* Search Bar Presisi */
-        .search-wrapper {
-            display: flex;
-            max-width: 90%;
-            width: 400px;
-            margin: 20px auto;
-            border: 2px solid #333;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .search-wrapper input { flex: 1; padding: 12px; border: none; outline: none; font-size: 16px; }
-        .search-wrapper button { background: #333; color: white; border: none; padding: 0 20px; cursor: pointer; }
+        /* Navbar Atas */
+        .navbar { display: flex; align-items: center; padding: 15px; background: white; border-bottom: 1px solid #ddd; position: sticky; top: 0; z-index: 1000; }
+        .btn-menu { background: #007bff; color: white; border: none; padding: 10px 18px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .brand-title { flex-grow: 1; text-align: center; font-size: 18px; font-weight: bold; margin-right: 60px; }
 
-        /* Footer Ikon Sosmed */
-        .footer-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ddd; }
-        .footer-nav a { text-decoration: none; color: black; font-size: 12px; display: flex; flex-direction: column; align-items: center; }
-        .footer-nav i { font-size: 24px; margin-bottom: 4px; }
+        /* Sidebar/Menu (Efek Slide) */
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: white; overflow-x: hidden; transition: 0.3s; padding-top: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        .sidebar a { padding: 15px 25px; text-decoration: none; font-size: 16px; color: #333; display: block; border-bottom: 1px solid #eee; }
+        .sidebar .close-btn { font-size: 30px; padding: 10px 25px; cursor: pointer; display: block; color: #ff4d4d; }
+        .sidebar-header { padding: 0 25px 15px; font-weight: bold; color: #007bff; font-size: 18px; border-bottom: 2px solid #007bff; }
+
+        /* Tombol Donate */
+        .donate-section { text-align: center; padding: 20px 0; }
+        .btn-donate { background: #ff4d4d; color: white; padding: 14px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(255, 77, 77, 0.4); font-size: 16px; }
+
+        /* Search Bar Presisi */
+        .search-container { text-align: center; padding: 10px 20px; }
+        .search-title { font-weight: bold; font-size: 18px; margin-bottom: 15px; display: block; }
+        .search-wrapper { display: flex; max-width: 400px; margin: 0 auto; border: 2px solid #555; border-radius: 12px; overflow: hidden; background: white; }
+        .search-wrapper input { flex: 1; padding: 14px; border: none; outline: none; font-size: 16px; }
+        .search-wrapper button { background: #444; color: white; border: none; padding: 0 20px; cursor: pointer; transition: 0.2s; }
+        .search-wrapper button:active { background: #000; }
+
+        /* Footer Ikon Sosial Media */
+        .footer-nav { position: fixed; bottom: 0; width: 100%; background: #222; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
+        .footer-nav a { text-decoration: none; color: white; font-size: 12px; display: flex; flex-direction: column; align-items: center; opacity: 0.9; }
+        .footer-nav i { font-size: 26px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <button class="btn-menu">Menu</button>
-        <h3 style="margin: 0; flex-grow: 1;">E-BOOK JESTRI</h3>
-        <div style="width: 60px;"></div> </div>
 
-    <div class="header">
-        <a href="#" class="btn-donate">❤️ DONATE</a>
-        
+    <div id="mySidebar" class="sidebar">
+        <span class="close-btn" onclick="closeNav()">&times;</span>
+        <div class="sidebar-header"><i class="fa fa-home"></i> Rumah</div>
+        <a href="#">Semua Buku</a>
+        <a href="#">Fiksi</a>
+        <a href="#">Edukasi</a>
+        <a href="#">Teknologi</a>
+        <a href="#">Bisnis</a>
+        <a href="#">Mencari</a>
+        <a href="#">Rilisan Baru</a>
+        <a href="#">Penulis</a>
+    </div>
+
+    <div class="navbar">
+        <button class="btn-menu" onclick="openNav()">Menu</button>
+        <div class="brand-title">E-BOOK JESTRI</div>
+    </div>
+
+    <div class="donate-section">
+        <a href="#" class="btn-donate">
+            <i class="fa fa-heart"></i> DONATE
+        </a>
+    </div>
+
+    <div class="search-container">
+        <span class="search-title">Cari Buku / Penulis</span>
         <div class="search-wrapper">
-            <input type="text" placeholder="Cari buku...">
+            <input type="text" placeholder="Ketik judul buku...">
             <button><i class="fa fa-search"></i></button>
         </div>
     </div>
 
     <div class="footer-nav">
-        <a href="+62 851-8941-5489">
+        <a href="https://wa.me/6285189415489" target="_blank">
             <i class="fab fa-whatsapp"></i>
             <span>WhatsApp</span>
         </a>
-        <a href="https://www.instagram.com/jesssstri?igsh=Ym1nb253bmtoZGd3">
+        <a href="https://www.instagram.com/jesssstri?igsh=Ym1nb253bmtoZGd3" target="_blank">
             <i class="fab fa-instagram"></i>
             <span>Instagram</span>
         </a>
     </div>
+
+    <script>
+        function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
+        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+    </script>
+
 </body>
 </html>
 

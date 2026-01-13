@@ -6,7 +6,6 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Path database sementara
 const booksPath = path.join('/tmp', 'books.json');
 if (!fs.existsSync(booksPath)) fs.writeFileSync(booksPath, JSON.stringify([]));
 
@@ -16,13 +15,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(session({ secret: 'jestri-key', resave: false, saveUninitialized: true }));
 
-// HALAMAN UTAMA
 app.get('/', (req, res) => {
     const books = JSON.parse(fs.readFileSync(booksPath));
     res.render('index', { books });
 });
 
-// LOGIN ADMIN (Menggunakan file admin.ejs yang ada di folder views kamu)
 app.get('/login-admin', (req, res) => {
     res.render('admin', { books: [] }); 
 });
@@ -32,10 +29,9 @@ app.post('/login-admin', (req, res) => {
         req.session.isAdmin = true;
         return res.redirect('/admin-dashboard');
     }
-    res.send('Password salah! <a href="/login-admin">Kembali</a>');
+    res.send('Password salah!');
 });
 
-// DASHBOARD ADMIN
 app.get('/admin-dashboard', (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
     const books = JSON.parse(fs.readFileSync(booksPath));
