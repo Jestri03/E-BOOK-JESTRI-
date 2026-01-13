@@ -2,26 +2,50 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Book Jestri</title>
+    <title>E-BOOK JESTRI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 10px; }
-        .card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .card img { width: 100%; max-width: 200px; border-radius: 5px; }
-        .price { color: #27ae60; font-weight: bold; font-size: 1.2em; }
-        .btn { display: block; background: #007bff; color: white; padding: 10px; text-decoration: none; border-radius: 5px; margin-top: 10px; }
+        body { font-family: sans-serif; background: #f8f9fa; margin: 0; text-align: center; }
+        .header { background: white; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .btn-donate { background: #ff4d6d; color: white; padding: 10px 25px; border-radius: 20px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 0; }
+        .search-container { padding: 10px; }
+        .search-box { width: 80%; padding: 10px; border: 1px solid #ccc; border-radius: 5px 0 0 5px; }
+        .search-btn { padding: 10px; background: #333; color: white; border: none; border-radius: 0 5px 5px 0; }
+        .card { background: white; margin: 15px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card img { width: 100%; border-radius: 5px; }
+        .price { color: #28a745; font-size: 1.2em; font-weight: bold; }
+        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .fab { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .bg-ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .bg-wa { background: #25d366; }
     </style>
 </head>
 <body>
-    <h2 style="text-align:center">Katalog E-Book Jestri</h2>
+    <div class="header">
+        <h2 style="margin:0">E-BOOK JESTRI</h2>
+        <a href="https://link.dana.id/qr/5n7t9o22" class="btn-donate"><i class="fa fa-heart"></i> DONATE</a>
+    </div>
+
+    <div class="search-container">
+        <p>Cari Buku / Penulis</p>
+        <input type="text" class="search-box" placeholder="Ketik judul buku...">
+        <button class="search-btn"><i class="fa fa-search"></i></button>
+    </div>
+
     <% books.forEach(book => { %>
         <div class="card">
-            <img src="<%= book.image %>" alt="Cover">
+            <img src="<%= book.image %>" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
             <h3><%= book.title %></h3>
             <p><%= book.description %></p>
             <p class="price">Rp <%= book.price %></p>
-            <a href="https://wa.me/6282210874136" class="btn">Beli Sekarang</a>
+            <a href="https://wa.me/6285189415489" style="background:#007bff; color:white; padding:10px; display:block; text-decoration:none; border-radius:5px">Beli Sekarang</a>
         </div>
     <% }) %>
+
+    <div class="fab-container">
+        <a href="https://www.instagram.com/jesssstri?igsh=Ym1nb253bmtoZGd3" class="fab bg-ig"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/6285189415489" class="fab bg-wa"><i class="fab fa-whatsapp"></i></a>
+    </div>
 </body>
 </html>
 

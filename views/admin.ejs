@@ -1,50 +1,50 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>Admin Panel</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
-        .box { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .btn { display: block; width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; text-align: center; font-weight: bold; box-sizing: border-box; }
-        .btn-blue { background: #007bff; color: white; }
-        .btn-green { background: #28a745; color: white; }
-        .btn-red { background: #dc3545; color: white; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+        h2 { margin-bottom: 20px; color: #333; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-submit { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .login-box i { font-size: 40px; color: #333; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <div class="box">
+    <div class="container">
         <% if (mode === 'login') { %>
-            <h2 style="text-align:center">Login Admin</h2>
-            <form action="/admin-dashboard" method="POST">
-                <input type="password" name="password" placeholder="Password" required>
-                <button type="submit" class="btn btn-blue">MASUK</button>
-            </form>
+            <div class="login-box">
+                <h2 style="font-size: 24px;">Admin Panel</h2>
+                <p>E-BOOK JESTRI</p>
+                <form action="/admin-dashboard" method="POST">
+                    <input type="password" name="password" placeholder="Password Admin" required>
+                    <button type="submit" style="background:#007bff; color:white; border:none; padding:12px; width:100%; border-radius:8px; margin-top:10px">MASUK</button>
+                </form>
+            </div>
 
         <% } else if (mode === 'menu-selection') { %>
-            <h2 style="text-align:center">Pilih Dashboard</h2>
-            <a href="/admin/katalog" class="btn btn-blue">📂 KELOLA KATALOG</a>
-            <a href="/admin/watermark-lab" class="btn btn-green">🧪 WATERMARK LAB</a>
-            <a href="/logout" class="btn btn-red">KELUAR</a>
+            <h2>Pilih Mode</h2>
+            <a href="/admin/katalog" style="display:block; background:#007bff; color:white; padding:15px; margin:10px; border-radius:8px; text-decoration:none">📂 KELOLA KATALOG</a>
+            <a href="/admin/watermark-lab" style="display:block; background:#28a745; color:white; padding:15px; margin:10px; border-radius:8px; text-decoration:none">🧪 WATERMARK LAB</a>
 
         <% } else if (mode === 'katalog') { %>
-            <h2>📂 Katalog Buku</h2>
-            <form action="/add-book" method="POST">
-                <input type="text" placeholder="Judul Buku" required>
-                <input type="text" placeholder="Harga" required>
-                <button class="btn btn-blue">TAMBAH</button>
+            <h2><i class="fa fa-plus-circle"></i> Tambah E-Book</h2>
+            <form action="#">
+                <input type="text" placeholder="Judul E-Book">
+                <select>
+                    <option>Fiksi</option>
+                    <option>Edukasi</option>
+                    <option>Bisnis</option>
+                </select>
+                <input type="text" placeholder="Harga (Contoh: 50.000)">
+                <textarea placeholder="Nama Penulis / Sinopsis Singkat"></textarea>
+                <p style="text-align:left; margin:5px 0">Foto Sampul (JPG/PNG)</p>
+                <input type="file">
+                <button type="button" class="btn-submit">PUBLIKASIKAN BUKU</button>
             </form>
-            <a href="/login-admin" style="display:block; text-align:center; margin-top:10px">Kembali</a>
-
-        <% } else if (mode === 'watermark-lab') { %>
-            <h2>🧪 Watermark Lab</h2>
-            <form action="/process-watermark" method="POST" enctype="multipart/form-data">
-                <input type="file" name="pdfFile" accept="application/pdf" required>
-                <button type="submit" class="btn btn-green">PROSES PDF</button>
-            </form>
-            <a href="/login-admin" style="display:block; text-align:center; margin-top:10px">Kembali</a>
+            <a href="/login-admin" style="display:block; margin-top:15px; color:#666; text-decoration:none">Kembali</a>
         <% } %>
     </div>
 </body>
