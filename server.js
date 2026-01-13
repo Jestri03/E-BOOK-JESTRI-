@@ -1,4 +1,4 @@
-onst express = require('express');
+const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
@@ -7,7 +7,7 @@ const { PDFDocument, rgb } = require('pdf-lib');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// DATA CADANGAN AGAR TIDAK INTERNAL SERVER ERROR
+// DATA BUKU PERMANEN (Tampilan Tetap)
 const BUKU_DATA = [{
     id: "1",
     title: "The Psychology of Money",
@@ -24,41 +24,51 @@ app.use(express.urlencoded({ extended: true }));
 
 const upload = multer({ dest: '/tmp/' });
 
-// --- ROUTES ---
+// --- ROUTES PEMBELI ---
 app.get('/', (req, res) => {
-    // Cek apakah file index ada, jika tidak, kirim pesan simpel agar tidak error 500
-    if (!fs.existsSync(path.join(__dirname, 'views', 'index.ejs'))) {
-        return res.send("<h1>Website JESTRI Sedang Loading...</h1><p>Tunggu 1 menit lalu refresh.</p>");
-    }
     res.render('index', { books: BUKU_DATA });
 });
 
-app.get('/login-admin', (req, res) => res.render('admin', { mode: 'login' }));
+// --- ROUTES ADMIN ---
+app.get('/login-admin', (req, res) => {
+    res.render('admin', { mode: 'login' });
+});
 
 app.post('/admin-dashboard', (req, res) => {
     if (req.body.password === 'JESTRI0301209') {
         res.render('admin', { mode: 'menu-selection' });
     } else {
-        res.send('<script>alert("Salah!"); window.location="/login-admin";</script>');
+        res.send('<script>alert("Password Salah!"); window.location="/login-admin";</script>');
     }
 });
 
-app.get('/admin/katalog', (req, res) => res.render('admin', { mode: 'katalog', books: BUKU_DATA }));
-app.get('/admin/watermark-lab', (req, res) => res.render('admin', { mode: 'watermark-lab' }));
-
-app.post('/process-watermark', upload.single('pdfFile'), async (req, res) => {
-    try {
-        if (!req.file) return res.send("Pilih file PDF!");
-        const bytes = fs.readFileSync(req.file.path);
-        const pdfDoc = await PDFDocument.load(bytes);
-        pdfDoc.getPages()[0].drawText('E-BOOK JESTRI SECURED', { x: 50, y: 50, size: 30, opacity: 0.5 });
-        const pdfBytes = await pdfDoc.save();
-        const out = path.join('/tmp', 'SECURED_' + req.file.originalname);
-        fs.writeFileSync(out, pdfBytes);
-        res.download(out);
-    } catch (err) { res.status(500).send("Gagal: " + err.message); }
+app.get('/admin/katalog', (req, res) => {
+    res.render('admin', { mode: 'katalog', books: BUKU_DATA });
 });
 
-app.listen(PORT, () => console.log('Server Ready'));
+app.get('/admin/watermark-lab', (req, res) => {
+    res.render('admin', { mode: 'watermark-lab' });
+});
+
+// PROSES WATERMARK (Dashboard Berbeda)
+app.post('/process-watermark', upload.single('pdfFile'), async (req, res) => {
+    if (!req.file) return res.send("Pilih file PDF!");
+    try {
+        const bytes = fs.readFileSync(req.file.path);
+        const pdfDoc = await PDFDocument.load(bytes);
+        const pages = pdfDoc.getPages();
+        pages[0].drawText('E-BOOK JESTRI SECURED', { x: 50, y: 50, size: 30, opacity: 0.5 });
+        const pdfBytes = await pdfDoc.save();
+        const outPath = path.join('/tmp', 'SECURED_' + req.file.originalname);
+        fs.writeFileSync(outPath, pdfBytes);
+        res.download(outPath);
+    } catch (err) {
+        res.status(500).send("Gagal: " + err.message);
+    }
+});
+
+app.get('/logout', (req, res) => res.redirect('/'));
+
+app.listen(PORT, () => console.log('Server Running'));
 module.exports = app;
 
