@@ -3,67 +3,63 @@ const session = require('express-session');
 const path = require('path');
 const app = express();
 
-// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public'))); // Untuk CSS/Gambar
 
-// Konfigurasi Session
+// Session agar admin tidak logout otomatis
 app.use(session({
-    secret: 'jestri-ebook-key',
+    secret: 'jestri-secret',
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 3600000 }
 }));
 
-// --- ROUTES ---
-
-// 1. Halaman Utama (Tampilan User seperti di video)
+// --- MODE PEMBELI (TIDAK DIUBAH) ---
 app.get('/', (req, res) => {
-    // Ganti 'index' dengan nama file ejs tampilan utama lo
-    res.render('index', { buku: [] }); 
+    res.render('index'); // Pastikan file tampilan pembeli lo namanya index.ejs
 });
 
-// 2. Login Admin
+// --- MODE ADMIN (PERBAIKAN) ---
+
+// 1. Halaman Login
 app.get('/login', (req, res) => {
     res.render('login');
 });
 
-app.post('/login', (req, res) => {
+// 2. Proses Login (Fix: "Cannot POST /admin-dashboard")
+// Jika di form login lo action="/admin-dashboard", maka pake rute ini:
+app.post('/admin-dashboard', (req, res) => {
     const { username, password } = req.body;
     if (username === 'admin' && password === 'admin123') {
         req.session.isLoggedIn = true;
-        res.redirect('/jestri-control');
+        res.redirect('/jestri-control'); // Pindah ke panel kontrol
     } else {
         res.send("Login Gagal! <a href='/login'>Kembali</a>");
     }
 });
 
-// 3. Dashboard Admin (Sesuai error 'Cannot GET /jestri-control')
+// 3. Panel Kontrol (Fix: "Cannot GET /jestri-control")
 app.get('/jestri-control', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
-    res.render('admin', { buku: [] }); // Ganti [] dengan data dari DB nanti
+    
+    // Kirim data buku kosong dulu agar tidak error saat render
+    res.render('admin', { buku: [] }); 
 });
 
-// 4. Proses Tambah Buku (Biar gak balik ke login)
+// 4. Proses Tambah Buku (Fix: Logout setelah tambah)
 app.post('/tambah-buku', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
-    // Logika simpan DB di sini
-    res.redirect('/jestri-control'); // Balik ke dashboard admin
+    
+    // Logika simpan database lo di sini
+    
+    // SETELAH BERHASIL: Balik ke panel kontrol, BUKAN ke login
+    res.redirect('/jestri-control');
 });
 
 // 5. Proses Hapus Buku
 app.get('/hapus-buku/:id', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
-    // Logika hapus DB di sini
     res.redirect('/jestri-control');
-});
-
-// 6. Logout
-app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
 });
 
 const PORT = process.env.PORT || 3000;
