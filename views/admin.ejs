@@ -3,105 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin | E-BOOK JESTRI</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Admin Dashboard - E-Book Jestri</title>
+    <link rel="stylesheet" href="/style.css">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .admin-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h1, h2 { text-align: center; color: #333; }
-        .card { background: #fff; border: 1px solid #eee; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        
-        /* Form Styling */
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        input[type="text"], input[type="password"], input[type="file"], select, textarea {
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px;
-        }
-        textarea { height: 80px; resize: none; }
-        
-        /* Button Styling */
-        .btn-add { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        .btn-add:hover { background: #218838; }
-        .btn-logout { display: block; text-align: center; margin-top: 20px; color: #dc3545; text-decoration: none; font-weight: bold; }
-        
-        /* Status Badge */
-        .badge-security { background: #e8f5e9; color: #2e7d32; padding: 5px 10px; border-radius: 5px; font-size: 12px; display: inline-block; margin-bottom: 10px; }
+        :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #e74c3c; --white: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; }
+        .container { max-width: 800px; margin: 50px auto; background: var(--white); padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); text-align: center; margin-bottom: 30px; }
+        .btn { display: block; width: 100%; padding: 15px; margin: 15px 0; text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.3s; border: none; cursor: pointer; font-size: 16px; }
+        .btn-katalog { background: var(--primary); color: white; }
+        .btn-watermark { background: var(--secondary); color: white; }
+        .btn-logout { background: var(--accent); color: white; margin-top: 30px; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .card { border: 1px solid #eee; padding: 15px; border-radius: 10px; margin-bottom: 10px; background: #fafafa; }
+        .status-msg { padding: 10px; background: #d4edda; color: #155724; border-radius: 5px; text-align: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="admin-container">
-        
-        <% if (mode === 'login') { %>
-            <h1>Login Admin</h1>
-            <div class="badge-security"><i class="fa fa-shield-alt"></i> Sistem Terenkripsi</div>
-            <form action="/login-admin" method="POST">
-                <div class="form-group">
-                    <label>Password Rahasia</label>
-                    <input type="password" name="password" placeholder="Masukkan Password" required>
-                </div>
-                <button type="submit" class="btn-add" style="background: #007bff;">MASUK PANEL</button>
+<div class="container">
+
+    <% if (mode === 'login') { %>
+        <h2>Login Admin Jestri</h2>
+        <form action="/admin-dashboard" method="POST">
+            <div class="form-group">
+                <label>Password Rahasia</label>
+                <input type="password" name="password" placeholder="Masukkan password..." required>
+            </div>
+            <button type="submit" class="btn btn-katalog">MASUK KE SISTEM</button>
+        </form>
+
+    <% } else if (mode === 'menu-selection') { %>
+        <h2>Pilih Dashboard Utama</h2>
+        <p style="text-align: center; color: #666;">Silakan pilih tugas yang ingin dilakukan:</p>
+        <a href="/admin/katalog" class="btn btn-katalog">📂 KELOLA KATALOG TOKO</a>
+        <a href="/admin/watermark-lab" class="btn btn-watermark">🧪 LABORATORIUM WATERMARK (PDF)</a>
+        <a href="/logout" class="btn btn-logout">KELUAR</a>
+
+    <% } else if (mode === 'katalog') { %>
+        <h2>📂 Kelola Katalog Buku</h2>
+        <div class="card">
+            <h3>Tambah Buku Baru</h3>
+            <form action="/add-book" method="POST" enctype="multipart/form-data">
+                <input type="text" name="title" placeholder="Judul Buku" required style="margin-bottom: 10px;">
+                <input type="text" name="genre" placeholder="Genre" required style="margin-bottom: 10px;">
+                <input type="text" name="price" placeholder="Harga (Contoh: 2.800)" required style="margin-bottom: 10px;">
+                <textarea name="description" placeholder="Deskripsi/Penulis" rows="3" style="margin-bottom: 10px;"></textarea>
+                <label>Foto Sampul:</label>
+                <input type="file" name="image" accept="image/*">
+                <button type="submit" class="btn btn-katalog">TAMBAHKAN KE TOKO</button>
             </form>
-            <a href="/" style="display:block; text-align:center; margin-top:15px; text-decoration:none; color:#666;">Kembali ke Beranda</a>
-        <% } %>
+        </div>
+        <a href="/admin-dashboard-back" onclick="event.preventDefault(); window.history.back();" style="color: #666; text-decoration: none; display: block; text-align: center; margin-top: 20px;">⬅ Kembali ke Menu Utama</a>
 
-        <% if (mode === 'dashboard') { %>
-            <h1>Panel Kontrol</h1>
-            <div class="badge-security"><i class="fa fa-check-circle"></i> Sesi Aktif: Admin Jestri</div>
+    <% } else if (mode === 'watermark-lab') { %>
+        <h2>🧪 Watermark Lab</h2>
+        <div class="card">
+            <p>Gunakan fitur ini untuk memberi tanda "E-BOOK JESTRI SECURED" pada file PDF pembeli secara otomatis.</p>
+            <form action="/process-watermark" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Pilih File PDF Mentah:</label>
+                    <input type="file" name="pdfFile" accept="application/pdf" required>
+                </div>
+                <button type="submit" class="btn btn-watermark">PROSES & DOWNLOAD HASIL</button>
+            </form>
+        </div>
+        <p style="font-size: 12px; color: #999; text-align: center;">Note: Proses ini dilakukan di server terpisah untuk menjaga kecepatan website.</p>
+        <a href="/admin-dashboard-back" onclick="event.preventDefault(); window.history.back();" style="color: #666; text-decoration: none; display: block; text-align: center; margin-top: 20px;">⬅ Kembali ke Menu Utama</a>
+    <% } %>
 
-            <div class="card">
-                <h2><i class="fa fa-plus-circle"></i> Tambah E-Book</h2>
-                <form action="/add-book" method="POST" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <input type="text" name="title" placeholder="Judul E-Book" required>
-                    </div>
-                    <div class="form-group">
-                        <select name="genre">
-                            <option>Fiksi</option>
-                            <option>Edukasi</option>
-                            <option>Teknologi</option>
-                            <option>Bisnis</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <input type="text" name="price" placeholder="Harga (Contoh: 50.000)" required>
-                    </div>
-                    <div class="form-group">
-                        <textarea name="description" placeholder="Nama Penulis / Sinopsis Singkat"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Foto Sampul (JPG/PNG)</label>
-                        <input type="file" name="image" accept="image/*" required>
-                    </div>
-                    <button type="submit" class="btn-add">PUBLIKASIKAN BUKU</button>
-                </form>
-            </div>
-
-            <div class="card" style="border: 2px solid #007bff; background: #f0f7ff;">
-                <h2 style="color: #007bff;"><i class="fa fa-file-shield"></i> Watermark Lab</h2>
-                <p style="font-size: 12px; color: #444; margin-bottom: 15px;">
-                    Tempelkan identitas <b>"E-BOOK JESTRI"</b> ke file PDF sebelum dikirim ke pembeli.
-                </p>
-                <form action="/secure-pdf" method="POST" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <input type="file" name="pdfFile" accept="application/pdf" required>
-                    </div>
-                    <button type="submit" style="background: #007bff; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer;">
-                        PROSES & DOWNLOAD PDF
-                    </button>
-                </form>
-            </div>
-
-            <div style="text-align: center; margin-top: 10px;">
-                <a href="/cek-keamanan-jestri" target="_blank" style="font-size: 12px; color: #999; text-decoration: none;">
-                    <i class="fa fa-history"></i> Lihat Log Percobaan Peretasan
-                </a>
-            </div>
-
-            <a href="/logout" class="btn-logout"><i class="fa fa-sign-out-alt"></i> Keluar Sistem</a>
-        <% } %>
-
-    </div>
+</div>
 
 </body>
 </html>

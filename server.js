@@ -7,7 +7,7 @@ const { PDFDocument, rgb } = require('pdf-lib');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// DATA TETAP - Agar TIDAK Internal Server Error lagi
+// Data Buku (Tampilan tetap sama seperti yang kamu mau)
 const BUKU_DATA = [{
     id: "1",
     title: "The Psychology of Money",
@@ -23,30 +23,43 @@ app.use(express.urlencoded({ extended: true }));
 
 const upload = multer({ dest: '/tmp/' });
 
+// Halaman Depan Pembeli (Tampilan tetap sama)
 app.get('/', (req, res) => {
     res.render('index', { books: BUKU_DATA });
 });
 
+// Sistem Login Admin
 app.get('/login-admin', (req, res) => res.render('admin', { mode: 'login' }));
 
+// Dashboard Pilihan (Katalog & Watermark Terpisah)
 app.post('/admin-dashboard', (req, res) => {
     if (req.body.password === 'JESTRI0301209') {
-        res.render('admin', { mode: 'dashboard', books: BUKU_DATA });
+        res.render('admin', { mode: 'menu-selection' });
     } else {
         res.send('<script>alert("Salah!"); window.location="/login-admin";</script>');
     }
 });
 
-app.post('/secure-pdf', upload.single('pdfFile'), async (req, res) => {
-    if (!req.file) return res.send("File PDF kosong");
+// Route Katalog
+app.get('/admin/katalog', (req, res) => {
+    res.render('admin', { mode: 'katalog', books: BUKU_DATA });
+});
+
+// Route Watermark (Dashboard Berbeda sesuai saran kamu)
+app.get('/admin/watermark-lab', (req, res) => {
+    res.render('admin', { mode: 'watermark-lab' });
+});
+
+app.post('/process-watermark', upload.single('pdfFile'), async (req, res) => {
+    if (!req.file) return res.send("File PDF belum dipilih!");
     try {
         const bytes = fs.readFileSync(req.file.path);
         const pdfDoc = await PDFDocument.load(bytes);
-        pdfDoc.getPages()[0].drawText('E-BOOK JESTRI', { x: 50, y: 50, size: 30, opacity: 0.5 });
+        pdfDoc.getPages()[0].drawText('E-BOOK JESTRI SECURED', { x: 50, y: 50, size: 30, opacity: 0.4 });
         const pdfBytes = await pdfDoc.save();
-        const out = path.join('/tmp', 'SECURED_' + req.file.originalname);
-        fs.writeFileSync(out, pdfBytes);
-        res.download(out);
+        const outPath = path.join('/tmp', 'SECURED_' + req.file.originalname);
+        fs.writeFileSync(outPath, pdfBytes);
+        res.download(outPath);
     } catch (err) { res.status(500).send("Gagal proses PDF"); }
 });
 
