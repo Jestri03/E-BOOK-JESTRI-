@@ -13,6 +13,7 @@ if (!fs.existsSync(booksPath)) fs.writeFileSync(booksPath, JSON.stringify([]));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use('/uploads', express.static('/tmp'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
