@@ -10,25 +10,43 @@
         .menu-icon { font-size: 24px; color: #333; cursor: pointer; }
         .btn-donate { background: #ff4d6d; color: white; padding: 8px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 13px; }
         
-        /* Sidebar */
-        .sidebar { position: fixed; left: -250px; top: 0; width: 250px; height: 100%; background: #333; transition: 0.3s; z-index: 2000; padding-top: 60px; }
-        .sidebar a { display: block; padding: 15px 25px; color: white; text-decoration: none; font-size: 18px; border-bottom: 1px solid #444; }
+        /* Sidebar Design Match Image */
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: white; transition: 0.3s; z-index: 2000; overflow-y: auto; text-align: left; }
         .sidebar.active { left: 0; }
+        .sidebar-header { padding: 20px; display: flex; justify-content: flex-end; }
+        .close-btn { font-size: 24px; color: #ff4d6d; cursor: pointer; }
+        .menu-section { padding: 10px 20px; border-bottom: 1px solid #f0f0f0; }
+        .section-title { font-size: 12px; color: #007bff; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .menu-item { display: flex; align-items: center; padding: 12px 0; color: #333; text-decoration: none; font-size: 15px; cursor: pointer; }
+        .menu-item i { width: 30px; font-size: 18px; color: #555; }
+        .menu-item i.fa-home { color: #007bff; }
+
         .overlay { position: fixed; display: none; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; }
         .overlay.active { display: block; }
-
-        /* Pencarian tetap ada sesuai permintaan */
         .search-area { padding: 20px; text-align: center; }
-        .search-box { width: 85%; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
+        .search-box { width: 85%; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
         .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 999; }
         .fab { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
     <div class="sidebar" id="sidebar">
-        <a href="/"><i class="fa fa-home"></i> Beranda</a>
-        <a href="https://wa.me/6285189415489"><i class="fa fa-headset"></i> Hubungi Kami</a>
+        <div class="sidebar-header"><i class="fa fa-times close-btn" onclick="toggleMenu()"></i></div>
+        <div class="menu-section"><a href="/" class="menu-item"><i class="fa fa-home"></i> Rumah</a></div>
+        <div class="menu-section">
+            <span class="section-title">GENRE</span>
+            <div class="menu-item" onclick="nav('Semua Buku')">Semua Buku</div>
+            <div class="menu-item" onclick="nav('Fiksi')">Fiksi</div>
+            <div class="menu-item" onclick="nav('Edukasi')">Edukasi</div>
+            <div class="menu-item" onclick="nav('Teknologi')">Teknologi</div>
+            <div class="menu-item" onclick="nav('Bisnis')">Bisnis</div>
+        </div>
+        <div class="menu-section">
+            <span class="section-title">LAINNYA</span>
+            <div class="menu-item" onclick="nav('Mencari')"><i class="fa fa-search"></i> Mencari</div>
+            <div class="menu-item" onclick="nav('Rilisan Baru')"><i class="fa fa-bolt"></i> Rilisan Baru</div>
+            <div class="menu-item" onclick="nav('Penulis')"><i class="fa fa-pen-nib"></i> Penulis</div>
+        </div>
     </div>
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
@@ -39,8 +57,12 @@
     </div>
 
     <div class="search-area">
-        <p style="margin-bottom: 10px; font-weight: bold; color: #444;">Cari Buku / Penulis</p>
+        <p style="margin-bottom:10px; font-weight:bold; color:#444;">Cari Buku / Penulis</p>
         <input type="text" class="search-box" placeholder="Ketik judul buku...">
+    </div>
+
+    <div style="text-align:center; padding:50px; color:#999;">
+        Belum ada koleksi buku.
     </div>
 
     <div class="fab-container">
@@ -52,6 +74,10 @@
         function toggleMenu() {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
+        }
+        function nav(page) {
+            alert("Membuka: " + page);
+            toggleMenu();
         }
     </script>
 </body>
