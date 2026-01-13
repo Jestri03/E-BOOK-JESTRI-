@@ -7,16 +7,16 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Database sementara untuk Vercel
+// Gunakan folder /tmp agar Vercel bisa menulis data sementara
 const booksPath = path.join('/tmp', 'books.json');
 if (!fs.existsSync(booksPath)) {
     fs.writeFileSync(booksPath, JSON.stringify([]));
 }
 
-// PENTING: Gunakan path.resolve agar Vercel tidak bingung mencari folder views
-app.set('views', path.resolve(__dirname, 'views'));
+// PENGATURAN PATH (Kunci agar Admin tidak Error)
 app.set('view engine', 'ejs');
-app.use(express.static(path.resolve(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
@@ -27,7 +27,9 @@ app.use(session({
 
 const upload = multer({ dest: '/tmp/' });
 
-// Route Halaman Utama
+// --- ROUTES ---
+
+// Halaman Utama Pembeli (Sudah Berhasil)
 app.get('/', (req, res) => {
     try {
         const books = JSON.parse(fs.readFileSync(booksPath));
@@ -37,9 +39,9 @@ app.get('/', (req, res) => {
     }
 });
 
-// Route Login
+// Halaman Login Admin
 app.get('/login-admin', (req, res) => {
-    res.render('admin-login');
+    res.render('admin-login'); 
 });
 
 app.post('/login-admin', (req, res) => {
@@ -52,30 +54,39 @@ app.post('/login-admin', (req, res) => {
     }
 });
 
-// Route Dashboard
+// Halaman Dashboard Admin
 app.get('/admin-dashboard', (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
-    const books = JSON.parse(fs.readFileSync(booksPath));
-    res.render('admin-dashboard', { books });
+    try {
+        const books = JSON.parse(fs.readFileSync(booksPath));
+        res.render('admin-dashboard', { books });
+    } catch (err) {
+        res.render('admin-dashboard', { books: [] });
+    }
 });
 
-// Route Tambah Buku
+// Proses Tambah Buku
 app.post('/add-book', upload.single('image'), (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
     const { title, price, description } = req.body;
-    const books = JSON.parse(fs.readFileSync(booksPath));
+    let books = [];
+    try {
+        books = JSON.parse(fs.readFileSync(booksPath));
+    } catch (e) { books = []; }
+
     books.push({
         id: Date.now(),
         title, price, description,
         image: req.file ? req.file.filename : ''
     });
+
     fs.writeFileSync(booksPath, JSON.stringify(books));
     res.redirect('/admin-dashboard');
 });
 
 // Jalankan Server
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server nyala di port ${PORT}`);
 });
 
 module.exports = app;
