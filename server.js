@@ -15,12 +15,12 @@ const BOOKS = [{
     description: "Penulis: Morgan Housel"
 }];
 
-// Route Pembeli
+// HALAMAN PEMBELI
 app.get('/', (req, res) => {
     res.render('index', { books: BOOKS });
 });
 
-// Link Khusus Admin (Terpisah)
+// LINK RAHASIA ADMIN
 app.get('/jestri-control', (req, res) => {
     res.render('admin', { mode: 'login' });
 });
@@ -29,7 +29,7 @@ app.post('/admin-dashboard', (req, res) => {
     if (req.body.password === 'JESTRI0301209') {
         res.render('admin', { mode: 'menu-selection' });
     } else {
-        res.send("<script>alert('Password Salah!'); window.location='/jestri-control';</script>");
+        res.send("<script>alert('Akses Ditolak!'); window.location='/jestri-control';</script>");
     }
 });
 

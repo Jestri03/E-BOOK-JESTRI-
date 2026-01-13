@@ -2,45 +2,38 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Admin Panel</title>
     <style>
         body { font-family: sans-serif; background: #eef2f7; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .admin-box { background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; box-sizing: border-box; }
-        .btn-primary { background: #007bff; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-primary:hover { background: #0056b3; }
-        .status-badge { background: #e8f5e9; color: #2e7d32; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
+        .box { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn { background: #007bff; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="admin-box">
+    <div class="box">
         <% if (mode === 'login') { %>
-            <i class="fa fa-user-lock" style="font-size: 50px; color: #007bff; margin-bottom: 15px;"></i>
             <h2>Admin Login</h2>
             <form action="/admin-dashboard" method="POST">
-                <input type="password" name="password" placeholder="Masukkan Password Rahasia" required>
-                <button type="submit" class="btn-primary">AUTHENTICATION</button>
+                <input type="password" name="password" placeholder="Password Admin" required>
+                <button type="submit" class="btn">MASUK</button>
             </form>
-            <a href="/" style="display:block; margin-top:20px; color:#888; text-decoration:none;">Batal & Kembali</a>
-
         <% } else if (mode === 'menu-selection') { %>
-            <div class="status-badge">SESSION ACTIVE</div>
-            <h2>Selamat Datang, Admin</h2>
-            <p style="color:#666">Silakan pilih menu manajemen</p>
-            <a href="/admin/katalog" style="display:block; background:#007bff; color:white; padding:15px; margin:10px 0; border-radius:10px; text-decoration:none; font-weight:bold;">📂 MANAJEMEN KATALOG</a>
-            <a href="/" style="display:block; background:#6c757d; color:white; padding:15px; border-radius:10px; text-decoration:none; font-weight:bold;">🏠 LIHAT WEBSITE</a>
-
+            <h2>Menu Admin</h2>
+            <a href="/admin/katalog" class="btn" style="display:block; text-decoration:none; margin-bottom:10px;">KELOLA KATALOG</a>
+            <a href="/" style="color:#666; text-decoration:none;">Lihat Web</a>
         <% } else if (mode === 'katalog') { %>
-            <h2><i class="fa fa-plus-circle"></i> Tambah Koleksi</h2>
+            <h2>Tambah Buku</h2>
             <form>
                 <input type="text" placeholder="Judul Buku">
-                <input type="text" placeholder="Harga (Tanpa Rp)">
-                <textarea placeholder="Deskripsi Singkat / Penulis" rows="3"></textarea>
-                <input type="text" placeholder="URL Gambar Cover">
-                <button type="button" class="btn-primary" onclick="alert('Berhasil Dipublikasikan (Simulasi)')">PUBLIKASIKAN SEKARANG</button>
+                <select><option>Fiksi</option><option>Edukasi</option></select>
+                <input type="text" placeholder="Harga (Contoh: 2.800)">
+                <input type="text" placeholder="Nama Penulis">
+                <p style="text-align:left; font-size:12px; color:#888;">Pilih Sampul (Galeri):</p>
+                <input type="file" accept="image/*">
+                <button type="button" class="btn" onclick="alert('Berhasil!')">PUBLIKASIKAN</button>
             </form>
-            <a href="/login-admin" style="display:block; margin-top:20px; color:#007bff; text-decoration:none; font-weight:bold;">Kembali ke Menu</a>
+            <a href="/jestri-control" style="display:block; margin-top:15px; color:#007bff; text-decoration:none;">Kembali</a>
         <% } %>
     </div>
 </body>
