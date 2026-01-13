@@ -1,29 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-BOOK JESTRI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; overflow-x: hidden; }
+        .header { background: white; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .menu-icon { font-size: 24px; color: #333; cursor: pointer; }
+        .btn-donate { background: #007bff; color: white; padding: 8px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 5px; }
+
+        /* Sidebar Putih Rapih */
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: white; transition: 0.3s ease; z-index: 2000; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar.active { left: 0; }
+        .sidebar-header { padding: 20px; display: flex; justify-content: flex-end; }
+        .close-btn { font-size: 24px; color: #ff4d6d; cursor: pointer; }
+        .menu-section { padding: 10px 20px; border-bottom: 1px solid #f0f0f0; }
+        .section-title { font-size: 11px; color: #007bff; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        .menu-item { display: flex; align-items: center; padding: 12px 0; color: #333; text-decoration: none; font-size: 15px; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+        .menu-item i { width: 30px; font-size: 18px; color: #555; }
+
+        .overlay { position: fixed; display: none; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1500; }
+        .overlay.active { display: block; }
+        .search-area { padding: 20px; text-align: center; }
+        .search-box { width: 85%; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; background: white; }
+        #main-view { padding: 20px; text-align: center; min-height: 200px; }
+        .empty-state { color: #888; margin-top: 50px; }
+
+        /* Floating Buttons */
+        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 999; }
+        .fab { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: 0.2s; }
+        .bg-ig { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285aeb 90%); }
+        .bg-wa { background: #25d366; }
+        .bg-tg { background: #0088cc; }
+    </style>
+</head>
+<body>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header"><i class="fa fa-times close-btn" onclick="toggleMenu()"></i></div>
-        
         <div class="menu-section">
-            <button class="menu-item" onclick="navigate('Beranda')">
-                <i class="fa fa-home" style="color:#007bff"></i> Beranda
-            </button>
+            <button class="menu-item" onclick="navigate('Beranda')"><i class="fa fa-home" style="color:#007bff"></i> Beranda</button>
         </div>
-
         <div class="menu-section">
             <span class="section-title">GENRE TERPOPULER</span>
             <button class="menu-item" onclick="navigate('Fiksi')">Fiksi</button>
             <button class="menu-item" onclick="navigate('Edukasi')">Edukasi</button>
             <button class="menu-item" onclick="navigate('Bisnis')">Bisnis</button>
             <button class="menu-item" onclick="navigate('Teknologi')">Teknologi</button>
-            <button class="menu-item" onclick="navigate('Self Improvement')">Pengembangan Diri</button>
+            <button class="menu-item" onclick="navigate('Pengembangan Diri')">Pengembangan Diri</button>
             <button class="menu-item" onclick="navigate('Novel')">Novel</button>
             <button class="menu-item" onclick="navigate('Komik')">Komik</button>
             <button class="menu-item" onclick="navigate('Sejarah')">Sejarah</button>
         </div>
-
         <div class="menu-section">
             <span class="section-title">LAINNYA</span>
             <button class="menu-item" onclick="navigate('Penulis')"><i class="fa fa-pen-nib"></i> Penulis</button>
             <button class="menu-item" onclick="navigate('Rilisan Baru')"><i class="fa fa-bolt"></i> Rilisan Baru</button>
         </div>
+    </div>
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="header">
+        <i class="fa fa-bars menu-icon" onclick="toggleMenu()"></i>
+        <div style="font-weight:bold; font-size:16px;">E-BOOK JESTRI</div>
+        <a href="https://link.dana.id/qr/5n7t9o22" class="btn-donate"><i class="fa fa-heart"></i> DONATE</a>
+    </div>
+
+    <div class="search-area">
+        <p style="margin-bottom:10px; font-weight:bold; color:#444; font-size: 14px;">Cari Buku / Penulis</p>
+        <input type="text" class="search-box" placeholder="Ketik judul buku...">
+    </div>
+
+    <div id="main-view">
+        <div class="empty-state">
+            <i class="fa fa-book-open" style="font-size: 40px; margin-bottom: 10px;"></i>
+            <p>Belum ada koleksi buku yang tersedia.</p>
+        </div>
+    </div>
+
+    <div class="fab-container">
+        <a href="https://t.me/+62895327806441" class="fab bg-tg" target="_blank"><i class="fab fa-telegram-plane"></i></a>
+        <a href="https://www.instagram.com/jesssstri?igsh=Ym1nb253bmtoZGd3" class="fab bg-ig" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://wa.me/6285189415489" class="fab bg-wa" target="_blank"><i class="fab fa-whatsapp"></i></a>
     </div>
 
     <script>
@@ -31,17 +90,11 @@
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
         }
-
         function navigate(category) {
-            const mainView = document.getElementById('main-view');
-            // Langsung ganti konten tanpa reload halaman (No Delay)
-            mainView.innerHTML = `
-                <div class="empty-state">
-                    <i class="fa fa-folder-open" style="font-size: 40px; color: #007bff; margin-bottom: 10px;"></i>
-                    <p>Menampilkan Koleksi: <b>${category}</b></p>
-                    <p style="font-size: 13px;">Belum ada buku di kategori ini.</p>
-                </div>`;
-            toggleMenu(); // Tutup menu otomatis
+            document.getElementById('main-view').innerHTML = `<div class='empty-state'>Menampilkan: <b>${category}</b><br>Koleksi sedang diperbarui.</div>`;
+            toggleMenu();
         }
     </script>
+</body>
+</html>
 
