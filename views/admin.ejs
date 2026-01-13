@@ -7,19 +7,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; }
+        
+        /* Navigasi Admin */
         .admin-nav { background: #333; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        
+        /* Kontainer Utama */
         .container { padding: 20px; max-width: 600px; margin: 0 auto; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h2 { margin-top: 0; color: #333; font-size: 20px; }
+        h2 { margin-top: 0; color: #333; font-size: 20px; display: flex; align-items: center; gap: 10px; }
         
         /* Form Styling */
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 14px; }
-        input, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; outline: none; font-size: 15px; }
-        input:focus, textarea:focus { border-color: #007bff; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; outline: none; font-size: 15px; background: white; }
+        input:focus, textarea:focus, select:focus { border-color: #007bff; }
         .btn-add { width: 100%; padding: 14px; background: #28a745; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
         
-        /* Login Box */
+        /* Login Screen */
         .login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; }
         .login-box { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 90%; max-width: 380px; text-align: center; }
     </style>
@@ -33,9 +37,10 @@
                     <i class="fa fa-lock" style="color: white; font-size: 25px;"></i>
                 </div>
                 <h1>Admin Panel</h1>
+                <p style="color: #666; font-size: 14px; margin-bottom: 25px;">E-BOOK JESTRI</p>
                 <form action="/login-admin" method="POST">
-                    <input type="password" name="password" placeholder="Password Admin" required style="margin-bottom: 20px;">
-                    <button type="submit" style="width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold;">LOGIN</button>
+                    <input type="password" name="password" placeholder="Password Admin" required>
+                    <button type="submit" style="width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">MASUK</button>
                 </form>
             </div>
         </div>
@@ -48,7 +53,7 @@
         <div class="container">
             <div class="card">
                 <h2>Selamat Datang, Jestri!</h2>
-                <p style="color: #666; font-size: 14px;">Gunakan formulir di bawah untuk menambah koleksi buku baru.</p>
+                <p style="color: #666; font-size: 14px;">Tambahkan buku baru untuk ditampilkan di dashboard utama.</p>
             </div>
 
             <div class="card">
@@ -56,21 +61,36 @@
                 <form action="/add-book" method="POST" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Judul Buku</label>
-                        <input type="text" name="title" placeholder="Contoh: The Psychology of Money" required>
+                        <input type="text" name="title" placeholder="Masukkan judul buku..." required>
                     </div>
+
+                    <div class="form-group">
+                        <label>Genre Buku</label>
+                        <select name="genre" required>
+                            <option value="Fiksi">Fiksi</option>
+                            <option value="Edukasi">Edukasi</option>
+                            <option value="Teknologi">Teknologi</option>
+                            <option value="Bisnis">Bisnis</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label>Harga (Rp)</label>
                         <input type="number" name="price" placeholder="Contoh: 5000" required>
                     </div>
+
                     <div class="form-group">
                         <label>Deskripsi / Penulis</label>
-                        <textarea name="description" rows="3" placeholder="Contoh: Morgan Housel"></textarea>
+                        <textarea name="description" rows="3" placeholder="Tulis nama penulis atau deskripsi singkat..."></textarea>
                     </div>
+
                     <div class="form-group">
                         <label>Cover Buku (Gambar)</label>
                         <input type="file" name="image" accept="image/*" required>
                     </div>
-                    <button type="submit" class="btn-add">SIMPAN BUKU</button>
+
+                    <button type="submit" class="btn-add">SIMPAN KE DASHBOARD</button>
                 </form>
             </div>
         </div>
