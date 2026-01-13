@@ -10,7 +10,7 @@
         .menu-icon { font-size: 24px; color: #333; cursor: pointer; }
         .btn-donate { background: #ff4d6d; color: white; padding: 8px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 13px; }
         
-        /* Sidebar Design Match Image */
+        /* SIDEBAR PUTIH SESUAI GAMBAR 2 */
         .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: white; transition: 0.3s; z-index: 2000; overflow-y: auto; text-align: left; }
         .sidebar.active { left: 0; }
         .sidebar-header { padding: 20px; display: flex; justify-content: flex-end; }
@@ -25,27 +25,25 @@
         .overlay.active { display: block; }
         .search-area { padding: 20px; text-align: center; }
         .search-box { width: 85%; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
-        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 999; }
-        .fab { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header"><i class="fa fa-times close-btn" onclick="toggleMenu()"></i></div>
-        <div class="menu-section"><a href="/" class="menu-item"><i class="fa fa-home"></i> Rumah</a></div>
+        <div class="menu-section"><a href="/" class="menu-item"><i class="fa fa-home"></i> Beranda</a></div>
         <div class="menu-section">
             <span class="section-title">GENRE</span>
-            <div class="menu-item" onclick="nav('Semua Buku')">Semua Buku</div>
-            <div class="menu-item" onclick="nav('Fiksi')">Fiksi</div>
-            <div class="menu-item" onclick="nav('Edukasi')">Edukasi</div>
-            <div class="menu-item" onclick="nav('Teknologi')">Teknologi</div>
-            <div class="menu-item" onclick="nav('Bisnis')">Bisnis</div>
+            <div class="menu-item" onclick="filter('Semua Buku')">Semua Buku</div>
+            <div class="menu-item" onclick="filter('Fiksi')">Fiksi</div>
+            <div class="menu-item" onclick="filter('Edukasi')">Edukasi</div>
+            <div class="menu-item" onclick="filter('Teknologi')">Teknologi</div>
+            <div class="menu-item" onclick="filter('Bisnis')">Bisnis</div>
         </div>
         <div class="menu-section">
             <span class="section-title">LAINNYA</span>
-            <div class="menu-item" onclick="nav('Mencari')"><i class="fa fa-search"></i> Mencari</div>
-            <div class="menu-item" onclick="nav('Rilisan Baru')"><i class="fa fa-bolt"></i> Rilisan Baru</div>
-            <div class="menu-item" onclick="nav('Penulis')"><i class="fa fa-pen-nib"></i> Penulis</div>
+            <div class="menu-item" onclick="filter('Mencari')"><i class="fa fa-search"></i> Mencari</div>
+            <div class="menu-item" onclick="filter('Rilisan Baru')"><i class="fa fa-bolt"></i> Rilisan Baru</div>
+            <div class="menu-item" onclick="filter('Penulis')"><i class="fa fa-pen-nib"></i> Penulis</div>
         </div>
     </div>
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
@@ -61,13 +59,8 @@
         <input type="text" class="search-box" placeholder="Ketik judul buku...">
     </div>
 
-    <div style="text-align:center; padding:50px; color:#999;">
+    <div style="text-align:center; padding:50px; color:#888;">
         Belum ada koleksi buku.
-    </div>
-
-    <div class="fab-container">
-        <a href="https://www.instagram.com/jesssstri?igsh=Ym1nb253bmtoZGd3" class="fab" style="background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285aeb 90%);"><i class="fab fa-instagram"></i></a>
-        <a href="https://wa.me/6285189415489" class="fab" style="background: #25d366;"><i class="fab fa-whatsapp"></i></a>
     </div>
 
     <script>
@@ -75,8 +68,8 @@
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
         }
-        function nav(page) {
-            alert("Membuka: " + page);
+        function filter(name) {
+            alert("Membuka: " + name);
             toggleMenu();
         }
     </script>
