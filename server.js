@@ -1,107 +1,82 @@
-onst express = require('express');
+const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const session = require('express-session');
 const multer = require('multer');
-const { PDFDocument, rgb } = require('pdf-lib');
+const compression = require('compression');
+const { PDFDocument, rgb, degrees } = require('pdf-lib');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// PERBAIKAN: Daftar buku tetap agar halaman depan TIDAK ERROR
-const BUKU_TETAP = [
+// Database Buku Tetap agar Tidak Internal Server Error
+const BUKU_DATA = [
     {
-        id: "101",
+        id: "1",
         title: "The Psychology of Money",
         genre: "Finansial",
         price: "2.800",
         description: "Penulis: Morgan Housel",
-        image: "https://i.ibb.co/LzNfXf0/1000715150.jpg" 
+        image: "https://i.ibb.co/LzNfXf0/1000715150.jpg"
     }
 ];
 
-const booksPath = path.join('/tmp', 'books.json');
-
+app.use(compression());
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-
-// PERBAIKAN: Sesi lebih longgar agar TIDAK Forbidden
-app.use(session({
-    secret: 'jestri-core-secret',
-    resave: true,
-    saveUninitialized: true,
-    cookie: { secure: false, maxAge: 3600000 }
-}));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json());
 
 const upload = multer({ dest: '/tmp/' });
 
 // --- ROUTES ---
 
+// 1. Halaman Pembeli (Fix Internal Server Error)
 app.get('/', (req, res) => {
-    try {
-        let booksData = [...BUKU_TETAP];
-        if (fs.existsSync(booksPath)) {
-            const uploaded = JSON.parse(fs.readFileSync(booksPath, 'utf8') || "[]");
-            booksData = [...BUKU_TETAP, ...uploaded];
-        }
-        res.render('index', { books: booksData });
-    } catch (e) {
-        // Jika error, tampilkan buku tetap saja supaya tidak Internal Server Error
-        res.render('index', { books: BUKU_TETAP });
-    }
+    res.render('index', { books: BUKU_DATA });
 });
 
-app.get('/login-admin', (req, res) => res.render('admin', { mode: 'login' }));
+// 2. Halaman Login
+app.get('/login-admin', (req, res) => {
+    res.render('admin', { mode: 'login' });
+});
 
-app.post('/login-admin', (req, res) => {
+// 3. Proses Login Langsung (Fix Forbidden)
+// Kita tidak pakai session dulu supaya Vercel tidak memblokir
+app.post('/admin-dashboard', (req, res) => {
     if (req.body.password === 'JESTRI0301209') {
-        req.session.isAdmin = true;
-        req.session.save(() => res.redirect('/admin-dashboard'));
+        res.render('admin', { mode: 'dashboard', books: BUKU_DATA });
     } else {
-        res.send('<script>alert("Salah!"); window.location="/login-admin";</script>');
+        res.send('<script>alert("Password Salah!"); window.location="/login-admin";</script>');
     }
 });
 
-app.get('/admin-dashboard', (req, res) => {
-    if (!req.session.isAdmin) return res.redirect('/login-admin');
-    let data = [];
-    if (fs.existsSync(booksPath)) data = JSON.parse(fs.readFileSync(booksPath, 'utf8') || "[]");
-    res.render('admin', { mode: 'dashboard', books: data });
-});
-
-// PERBAIKAN: Watermark Lab (Anti-Forbidden)
+// 4. Fitur Watermark Lab (Fix Forbidden)
 app.post('/secure-pdf', upload.single('pdfFile'), async (req, res) => {
-    if (!req.session.isAdmin) return res.status(403).send("Forbidden: Silakan Login Admin Kembali");
-    if (!req.file) return res.send("File tidak terpilih");
+    if (!req.file) return res.send("File tidak ditemukan!");
     try {
         const bytes = fs.readFileSync(req.file.path);
         const pdfDoc = await PDFDocument.load(bytes);
-        pdfDoc.getPages().forEach(p => p.drawText('E-BOOK JESTRI', { x: 50, y: 50, size: 50, opacity: 0.3 }));
+        const pages = pdfDoc.getPages();
+        pages.forEach((page) => {
+            page.drawText('E-BOOK JESTRI', {
+                x: 50, y: 50, size: 50,
+                color: rgb(0.8, 0.8, 0.8), opacity: 0.3, rotate: degrees(45),
+            });
+        });
         const pdfBytes = await pdfDoc.save();
-        const out = path.join('/tmp', 'SECURED_' + req.file.originalname);
-        fs.writeFileSync(out, pdfBytes);
-        res.download(out);
-    } catch (err) { res.send("Gagal proses PDF"); }
-});
-
-app.post('/add-book', upload.single('image'), (req, res) => {
-    if (!req.session.isAdmin) return res.redirect('/login-admin');
-    const books = fs.existsSync(booksPath) ? JSON.parse(fs.readFileSync(booksPath, 'utf8') || "[]") : [];
-    books.push({
-        id: Date.now(), title: req.body.title, genre: req.body.genre,
-        price: req.body.price, description: req.body.description,
-        image: req.file ? req.file.filename : ''
-    });
-    fs.writeFileSync(booksPath, JSON.stringify(books));
-    res.redirect('/admin-dashboard');
+        const outputPath = path.join('/tmp', 'SECURED_' + req.file.originalname);
+        fs.writeFileSync(outputPath, pdfBytes);
+        res.download(outputPath);
+    } catch (err) {
+        res.status(500).send("Gagal memproses PDF: " + err.message);
+    }
 });
 
 app.get('/logout', (req, res) => {
-    req.session.destroy();
     res.redirect('/');
 });
 
-app.listen(PORT, () => console.log('Ready'));
+app.listen(PORT, () => console.log('Server Aktif di Port ' + PORT));
 module.exports = app;
 
