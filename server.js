@@ -14,7 +14,6 @@ app.use(express.urlencoded({ extended: true }));
 
 const upload = multer({ dest: '/tmp/' });
 
-// DATA BUKU
 const BOOKS = [{ id: "1", title: "The Psychology of Money", price: "2.800", image: "https://i.ibb.co/LzNfXf0/1000715150.jpg" }];
 
 app.get('/', (req, res) => res.render('index', { books: BOOKS }));
