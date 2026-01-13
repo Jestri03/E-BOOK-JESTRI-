@@ -6,42 +6,58 @@
     <title>E-BOOK JESTRI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; margin: 0; text-align: center; }
-        .header { padding: 20px; }
-        .btn-donate { background: #ff4d4d; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 0; }
+        body { font-family: sans-serif; margin: 0; padding-bottom: 70px; text-align: center; }
         
-        /* CSS TOMBOL PRESISI */
+        /* Navigasi Atas */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px; }
+        .btn-menu { background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        
+        .header { padding: 10px; }
+        .btn-donate { background: #ff4d4d; color: white; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; margin: 10px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        /* Search Bar Presisi */
         .search-wrapper {
             display: flex;
-            max-width: 400px;
+            max-width: 90%;
+            width: 400px;
             margin: 20px auto;
             border: 2px solid #333;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
         }
-        .search-wrapper input {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            outline: none;
-        }
-        .search-wrapper button {
-            background: #333;
-            color: white;
-            border: none;
-            padding: 0 20px;
-            cursor: pointer;
-        }
+        .search-wrapper input { flex: 1; padding: 12px; border: none; outline: none; font-size: 16px; }
+        .search-wrapper button { background: #333; color: white; border: none; padding: 0 20px; cursor: pointer; }
+
+        /* Footer Ikon Sosmed */
+        .footer-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ddd; }
+        .footer-nav a { text-decoration: none; color: black; font-size: 12px; display: flex; flex-direction: column; align-items: center; }
+        .footer-nav i { font-size: 24px; margin-bottom: 4px; }
     </style>
 </head>
 <body>
+    <div class="navbar">
+        <button class="btn-menu">Menu</button>
+        <h3 style="margin: 0; flex-grow: 1;">E-BOOK JESTRI</h3>
+        <div style="width: 60px;"></div> </div>
+
     <div class="header">
-        <h2>E-BOOK JESTRI</h2>
         <a href="#" class="btn-donate">❤️ DONATE</a>
+        
         <div class="search-wrapper">
             <input type="text" placeholder="Cari buku...">
             <button><i class="fa fa-search"></i></button>
         </div>
+    </div>
+
+    <div class="footer-nav">
+        <a href="+62 851-8941-5489">
+            <i class="fab fa-whatsapp"></i>
+            <span>WhatsApp</span>
+        </a>
+        <a href="https://www.instagram.com/jesssstri?igsh=Ym1nb253bmtoZGd3">
+            <i class="fab fa-instagram"></i>
+            <span>Instagram</span>
+        </a>
     </div>
 </body>
 </html>
