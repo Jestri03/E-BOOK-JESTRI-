@@ -1,70 +1,42 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin | Jestri E-Book</title>
+    <title>Admin Jestri</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
-        .container { background: white; padding: 20px; border-radius: 8px; shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1 { color: #333; }
-        .btn-logout { color: white; background: #ff4444; padding: 8px 15px; text-decoration: none; border-radius: 4px; float: right; }
-        form { margin-bottom: 30px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
-        input { padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 8px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        body { font-family: sans-serif; padding: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
-        th { background-color: #007bff; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .btn-hapus { color: #ff4444; text-decoration: none; font-weight: bold; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        .btn-hapus { color: red; text-decoration: none; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <a href="/logout" class="btn-logout">Logout</a>
-    <h1>Panel Kendali Admin</h1>
-    <p>Selamat datang di sistem manajemen E-Book Jestri.</p>
+    <h1>Dashboard Admin</h1>
+    <a href="/logout">Logout</a>
     <hr>
 
-    <h3>Tambah Buku Baru</h3>
+    <h3>Tambah Buku</h3>
     <form action="/tambah-buku" method="POST">
         <input type="text" name="judul" placeholder="Judul Buku" required>
-        <input type="number" name="harga" placeholder="Harga (Rp)" required>
-        <button type="submit">Simpan ke Database</button>
+        <input type="number" name="harga" placeholder="Harga" required>
+        <button type="submit">Simpan</button>
     </form>
 
-    <h3>Daftar Buku Tersedia</h3>
     <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Judul Buku</th>
-                <th>Harga</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% if (buku && buku.length > 0) { %>
-                <% buku.forEach((item, index) => { %>
-                <tr>
-                    <td><%= index + 1 %></td>
-                    <td><%= item.judul %></td>
-                    <td>Rp <%= item.harga %></td>
-                    <td>
-                        <a href="/hapus-buku/<%= item.id %>" class="btn-hapus" onclick="return confirm('Apakah Anda yakin ingin menghapus buku ini?')">Hapus</a>
-                    </td>
-                </tr>
-                <% }) %>
-            <% } else { %>
-                <tr>
-                    <td colspan="4" style="text-align: center;">Belum ada data buku.</td>
-                </tr>
-            <% } %>
-        </tbody>
+        <tr>
+            <th>Judul</th>
+            <th>Harga</th>
+            <th>Aksi</th>
+        </tr>
+        <% buku.forEach(item => { %>
+        <tr>
+            <td><%= item.judul %></td>
+            <td><%= item.harga %></td>
+            <td>
+                <a href="/hapus-buku/<%= item.id %>" class="btn-hapus" onclick="return confirm('Yakin?')">Hapus</a>
+            </td>
+        </tr>
+        <% }) %>
     </table>
-</div>
-
 </body>
 </html>
 

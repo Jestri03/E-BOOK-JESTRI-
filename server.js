@@ -1,70 +1,84 @@
 const express = require('express');
 const session = require('express-session');
+const path = require('path');
 const app = express();
 
-// Middleware agar server bisa baca input form
+// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
-// 1. PENGATURAN SESSION (Kunci agar tidak logout sendiri)
+// Pengaturan Session (Kunci biar nggak logout sendiri)
 app.use(session({
-    secret: 'jestri-super-secret',
+    secret: 'jestri-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 3600000 } // Sesi bertahan 1 jam
+    cookie: { maxAge: 3600000 } // Sesi 1 jam
 }));
 
-// 2. ROUTE LOGIN
+// --- ROUTES ---
+
+// 1. Route Beranda (Biar nggak "Cannot GET /")
+app.get('/', (req, res) => {
+    res.redirect('/login');
+});
+
+// 2. Route Login
 app.get('/login', (req, res) => {
     res.render('login');
 });
 
-app.post('/login-proses', (req, res) => {
+app.post('/login', (req, res) => {
     const { username, password } = req.body;
-    // Ganti admin123 dengan password Anda
+    // Ganti sesuai keinginan lu
     if (username === 'admin' && password === 'admin123') {
         req.session.isLoggedIn = true;
         res.redirect('/jestri-control'); 
     } else {
-        res.send("Login Gagal! <a href='/login'>Coba Lagi</a>");
+        res.send("Login Gagal! <a href='/login'>Balik lagi</a>");
     }
 });
 
-// 3. ROUTE DASHBOARD (Pusat Kendali)
+// 3. Route Dashboard (Sesuai error "Cannot GET /jestri-control")
 app.get('/jestri-control', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     
-    // Contoh data buku (Nanti hubungkan ke database Anda)
-    const daftar_buku = [
-        { id: 1, judul: "Buku Contoh", harga: "50000" }
+    // Ini contoh data, nanti sambungin ke DB lu
+    const dataBuku = [
+        { id: 1, judul: "Buku Sakti", harga: "50000" }
     ];
     
-    res.render('admin', { buku: daftar_buku }); 
+    res.render('admin', { buku: dataBuku });
 });
 
-// 4. ROUTE TAMBAH BUKU
+// 4. Route Tambah Buku
 app.post('/tambah-buku', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     
-    // Logika simpan database Anda di sini (misal: db.query...)
-    console.log("Buku berhasil ditambah:", req.body.judul);
-    
-    // KUNCI: Redirect kembali ke dashboard, bukan ke login
+    // --- Proses Simpan ke Database Lu di Sini ---
+    console.log("Nambah buku:", req.body.judul);
+
+    // BALIK KE DASHBOARD, BUKAN LOGIN
     res.redirect('/jestri-control');
 });
 
-// 5. ROUTE HAPUS BUKU
+// 5. Route Hapus Buku
 app.get('/hapus-buku/:id', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     
-    const idBuku = req.params.id;
-    console.log("Buku dihapus id:", idBuku);
+    console.log("Hapus ID:", req.params.id);
 
     res.redirect('/jestri-control');
 });
 
+// 6. Logout
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/login');
+});
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server nyala di http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server jalan di port ${PORT}`));
 
 module.exports = app;
 
