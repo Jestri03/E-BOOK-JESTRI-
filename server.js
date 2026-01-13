@@ -2,87 +2,60 @@ const express = require('express');
 const session = require('express-session');
 const app = express();
 
-// 1. Middleware untuk membaca data dari form (WAJIB)
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 app.set('view engine', 'ejs');
 
-// 2. Konfigurasi Session (Agar tidak logout otomatis)
+// Konfigurasi Session agar login tidak hilang saat tambah/hapus
 app.use(session({
-    secret: 'jestri_secret_key_123',
+    secret: 'jestri-secret',
     resave: false,
     saveUninitialized: false,
-    cookie: { 
-        secure: false, // Set ke true hanya jika menggunakan HTTPS
-        maxAge: 24 * 60 * 60 * 1000 // Aktif selama 24 jam
-    }
+    cookie: { maxAge: 3600000 } // Sesi aktif 1 jam
 }));
 
-// 3. Middleware Proteksi Admin
-const isAdmin = (req, res, next) => {
-    if (req.session.isLoggedIn) {
-        next();
-    } else {
-        res.redirect('/login');
-    }
-};
-
-// --- ROUTES ---
-
-// Halaman Login
+// Route Login (Halaman)
 app.get('/login', (req, res) => {
-    res.render('login'); 
+    res.render('login');
 });
 
 // Proses Login
-app.post('/login', (req, res) => {
+app.post('/login-proses', (req, res) => {
     const { username, password } = req.body;
-    // Sesuaikan username/pass Anda
     if (username === 'admin' && password === 'admin123') {
         req.session.isLoggedIn = true;
-        res.redirect('/jestri-control'); // Redirect ke dashboard setelah login
+        res.redirect('/jestri-control'); // Redirect ke dashboard
     } else {
-        res.send("Login gagal. <a href='/login'>Coba lagi</a>");
+        res.send("Login Gagal! <a href='/login'>Coba Lagi</a>");
     }
 });
 
-// Halaman Dashboard Admin
-app.get('/jestri-control', isAdmin, (req, res) => {
-    // Di sini biasanya Anda memanggil data dari DB (misal variabel 'books')
-    // res.render('admin', { books: result });
-    res.render('admin'); 
+// Dashboard Admin
+app.get('/jestri-control', (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect('/login');
+    // Asumsikan 'buku' adalah data dari database Anda
+    res.render('admin', { buku: [] }); 
 });
 
-// Proses Tambah Buku
-app.post('/tambah-buku', isAdmin, (req, res) => {
-    // --- LOGIKA DATABASE ANDA DI SINI ---
-    // Contoh: db.query("INSERT INTO...", (err) => { ... })
+// Proses Tambah Buku (Kunci agar tidak logout)
+app.post('/tambah-buku', (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect('/login');
     
-    // SESUDAH BERHASIL: Kembali ke dashboard admin, BUKAN ke login!
+    // Logika simpan database Anda di sini...
+    
+    // SETELAH BERHASIL: Kembali ke dashboard, BUKAN login
     res.redirect('/jestri-control');
 });
 
 // Proses Hapus Buku
-app.get('/hapus-buku/:id', isAdmin, (req, res) => {
-    // --- LOGIKA DATABASE ANDA DI SINI ---
+app.get('/hapus-buku/:id', (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect('/login');
     
-    // SESUDAH BERHASIL: Kembali ke dashboard admin
+    // Logika hapus database Anda di sini...
+    
     res.redirect('/jestri-control');
 });
 
-// Route Logout
-app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/login');
-});
-
-// Menangani Error 404 (Route tidak ditemukan)
-app.use((req, res) => {
-    res.status(404).send("Halaman tidak ditemukan. Coba cek route di server.js");
-});
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server berjalan di port ${PORT}`));
-
-module.exports = app; // Penting untuk Vercel
+app.listen(PORT, () => console.log(`Server jalan di port ${PORT}`));
+module.exports = app;
 
