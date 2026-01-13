@@ -2,26 +2,54 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN CONTROL</title>
+    <title>ADMIN DASHBOARD - JESTRI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: auto; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { text-align: center; font-size: 20px; color: #333; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .btn-add { background: #007bff; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        
+        /* List Hapus Buku */
+        .book-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .btn-delete { color: #ff4d6d; cursor: pointer; border: none; background: none; font-size: 18px; }
     </style>
 </head>
 <body>
-    <div class="card">
+    <div class="container">
         <% if (mode === 'login') { %>
-            <h2>Login Admin</h2>
-            <form action="/admin-dashboard" method="POST">
-                <input type="password" name="password" placeholder="Masukkan Password" required>
-                <button type="submit">MASUK</button>
-            </form>
+            <div class="card">
+                <h2>Login Admin</h2>
+                <form action="/admin-dashboard" method="POST">
+                    <input type="password" name="password" placeholder="Masukkan Password" required>
+                    <button type="submit" class="btn-add">MASUK</button>
+                </form>
+            </div>
         <% } else { %>
-            <h2>Menu Admin</h2>
-            <button onclick="alert('Fitur Kelola Katalog Siap!')">KELOLA KATALOG</button>
-            <a href="/" style="display:block; margin-top:15px; text-decoration:none; color:#888;">Lihat Web</a>
+            <div class="card">
+                <h2><i class="fa fa-plus-circle"></i> Tambah Koleksi</h2>
+                <form action="/add-book" method="POST" enctype="multipart/form-data">
+                    <input type="text" name="title" placeholder="1. Judul Buku" required>
+                    <input type="text" name="author" placeholder="2. Penulis Buku" required>
+                    <input type="number" name="price" placeholder="3. Harga Buku (Tanpa Rp)" required>
+                    <label style="font-size: 12px; color: #666;">4. Upload Gambar dari Galeri:</label>
+                    <input type="file" name="image" accept="image/*" required>
+                    <button type="submit" class="btn-add">PUBLIKASIKAN SEKARANG</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2><i class="fa fa-trash"></i> Hapus Koleksi</h2>
+                <div id="book-list">
+                    <div class="book-item">
+                        <span>Buku Contoh 1</span>
+                        <button class="btn-delete" onclick="confirm('Hapus buku ini?')"><i class="fa fa-trash-alt"></i></button>
+                    </div>
+                </div>
+                <a href="/" style="display:block; text-align:center; margin-top:20px; color:#007bff; text-decoration:none;">Kembali ke Beranda</a>
+            </div>
         <% } %>
     </div>
 </body>
