@@ -1,4 +1,4 @@
-onst express = require('express');
+const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
@@ -7,16 +7,16 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Path Database Sementara di Vercel
+// Database sementara untuk Vercel
 const booksPath = path.join('/tmp', 'books.json');
 if (!fs.existsSync(booksPath)) {
     fs.writeFileSync(booksPath, JSON.stringify([]));
 }
 
-// PENTING: Pengaturan Folder Views agar tidak Error 500
+// PENTING: Gunakan path.resolve agar Vercel tidak bingung mencari folder views
+app.set('views', path.resolve(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.set('views', path.join(process.cwd(), 'views'));
-app.use(express.static(path.join(process.cwd(), 'public')));
+app.use(express.static(path.resolve(__dirname, 'public')));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
@@ -64,20 +64,16 @@ app.post('/add-book', upload.single('image'), (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
     const { title, price, description } = req.body;
     const books = JSON.parse(fs.readFileSync(booksPath));
-    
     books.push({
         id: Date.now(),
-        title,
-        price,
-        description,
+        title, price, description,
         image: req.file ? req.file.filename : ''
     });
-
     fs.writeFileSync(booksPath, JSON.stringify(books));
     res.redirect('/admin-dashboard');
 });
 
-// Export untuk Vercel
+// Jalankan Server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
