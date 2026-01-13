@@ -1,42 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Jestri</title>
+    <title>Admin - E-BOOK JESTRI</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+        .box { background: white; padding: 20px; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        .btn-hapus { color: red; text-decoration: none; }
+        .logout { color: red; float: right; }
     </style>
 </head>
 <body>
-    <h1>Dashboard Admin</h1>
-    <a href="/logout">Logout</a>
-    <hr>
+    <div class="box">
+        <a href="/logout" class="logout">Logout</a>
+        <h2>Dashboard Admin Jestri</h2>
+        <hr>
+        
+        <form action="/tambah-buku" method="POST">
+            <input type="text" name="judul" placeholder="Judul Buku" required>
+            <input type="number" name="harga" placeholder="Harga" required>
+            <button type="submit" style="background: green; color: white;">Tambah Buku</button>
+        </form>
 
-    <h3>Tambah Buku</h3>
-    <form action="/tambah-buku" method="POST">
-        <input type="text" name="judul" placeholder="Judul Buku" required>
-        <input type="number" name="harga" placeholder="Harga" required>
-        <button type="submit">Simpan</button>
-    </form>
-
-    <table>
-        <tr>
-            <th>Judul</th>
-            <th>Harga</th>
-            <th>Aksi</th>
-        </tr>
-        <% buku.forEach(item => { %>
-        <tr>
-            <td><%= item.judul %></td>
-            <td><%= item.harga %></td>
-            <td>
-                <a href="/hapus-buku/<%= item.id %>" class="btn-hapus" onclick="return confirm('Yakin?')">Hapus</a>
-            </td>
-        </tr>
-        <% }) %>
-    </table>
+        <table>
+            <tr style="background: #eee;">
+                <th>Judul</th>
+                <th>Harga</th>
+                <th>Aksi</th>
+            </tr>
+            <% buku.forEach(item => { %>
+            <tr>
+                <td><%= item.judul %></td>
+                <td><%= item.harga %></td>
+                <td>
+                    <a href="/hapus-buku/<%= item.id %>" style="color: red;" onclick="return confirm('Yakin hapus?')">Hapus</a>
+                </td>
+            </tr>
+            <% }) %>
+        </table>
+    </div>
 </body>
 </html>
 
