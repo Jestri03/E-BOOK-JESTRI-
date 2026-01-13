@@ -7,15 +7,13 @@ const multer = require('multer');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Database sementara (Vercel /tmp)
 const booksPath = path.join('/tmp', 'books.json');
 if (!fs.existsSync(booksPath)) fs.writeFileSync(booksPath, JSON.stringify([]));
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use('/uploads', express.static('/tmp'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('/tmp'));
 
 app.use(session({
     secret: 'jestri-secret-key',
@@ -23,22 +21,26 @@ app.use(session({
     saveUninitialized: true
 }));
 
-// Konfigurasi simpan gambar ke folder /tmp agar bisa diupload di Vercel
 const upload = multer({ dest: '/tmp/' });
-app.use('/uploads', express.static('/tmp'));
 
 // --- ROUTES ---
 
-// 1. Dashboard Pembeli
+// Halaman Utama dengan Fitur Filter Genre & Cari
 app.get('/', (req, res) => {
-    const books = JSON.parse(fs.readFileSync(booksPath));
-    res.render('index', { books });
+    let books = JSON.parse(fs.readFileSync(booksPath));
+    const { genre, search } = req.query;
+
+    if (genre && genre !== 'Semua Buku') {
+        books = books.filter(b => b.genre === genre);
+    }
+    if (search) {
+        books = books.filter(b => b.title.toLowerCase().includes(search.toLowerCase()));
+    }
+    
+    res.render('index', { books, activeGenre: genre || 'Semua Buku' });
 });
 
-// 2. Login Admin
-app.get('/login-admin', (req, res) => {
-    res.render('admin', { mode: 'login' });
-});
+app.get('/login-admin', (req, res) => res.render('admin', { mode: 'login' }));
 
 app.post('/login-admin', (req, res) => {
     if (req.body.password === 'jestri123') {
@@ -48,14 +50,12 @@ app.post('/login-admin', (req, res) => {
     res.send('<script>alert("Password Salah!"); window.location="/login-admin";</script>');
 });
 
-// 3. Dashboard Admin
 app.get('/admin-dashboard', (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
     const books = JSON.parse(fs.readFileSync(booksPath));
     res.render('admin', { mode: 'dashboard', books });
 });
 
-// 4. Proses Tambah Buku
 app.post('/add-book', upload.single('image'), (req, res) => {
     if (!req.session.isAdmin) return res.redirect('/login-admin');
     const books = JSON.parse(fs.readFileSync(booksPath));
@@ -64,7 +64,7 @@ app.post('/add-book', upload.single('image'), (req, res) => {
         title: req.body.title,
         genre: req.body.genre,
         price: req.body.price,
-        description: req.body.description,
+        description: req.body.description || 'Penulis Rahasia',
         image: req.file ? req.file.filename : ''
     });
     fs.writeFileSync(booksPath, JSON.stringify(books));
@@ -76,6 +76,6 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.listen(PORT, () => console.log('Server Ready'));
+app.listen(PORT, () => console.log('Server Running'));
 module.exports = app;
 
