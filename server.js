@@ -3,67 +3,90 @@ const session = require('express-session');
 const path = require('path');
 const app = express();
 
+// Middleware dasar
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Session agar admin tidak logout otomatis
+// Konfigurasi Session (Kunci biar admin gak logout sendiri)
 app.use(session({
-    secret: 'jestri-secret',
+    secret: 'jestri-secret-key',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 3600000 }
+    cookie: { maxAge: 3600000 } // Sesi 1 jam
 }));
 
-// --- MODE PEMBELI (TIDAK DIUBAH) ---
+// ==========================================
+// 1. MODE PEMBELI (SESUAI VIDEO LO - JANGAN DIUBAH)
+// ==========================================
 app.get('/', (req, res) => {
-    res.render('index'); // Pastikan file tampilan pembeli lo namanya index.ejs
+    // Menampilkan halaman utama pembeli lo
+    res.render('index'); 
 });
 
-// --- MODE ADMIN (PERBAIKAN) ---
+// Tambahkan rute kategori lain sesuai video lo di sini jika ada
+// Contoh: app.get('/kategori', ...)
 
-// 1. Halaman Login
+// ==========================================
+// 2. MODE ADMIN (PERBAIKAN FITUR)
+// ==========================================
+
+// Rute Login
 app.get('/login', (req, res) => {
     res.render('login');
 });
 
-// 2. Proses Login (Fix: "Cannot POST /admin-dashboard")
-// Jika di form login lo action="/admin-dashboard", maka pake rute ini:
-app.post('/admin-dashboard', (req, res) => {
+// Proses Login
+app.post('/login', (req, res) => {
     const { username, password } = req.body;
     if (username === 'admin' && password === 'admin123') {
         req.session.isLoggedIn = true;
-        res.redirect('/jestri-control'); // Pindah ke panel kontrol
+        res.redirect('/jestri-control');
     } else {
         res.send("Login Gagal! <a href='/login'>Kembali</a>");
     }
 });
 
-// 3. Panel Kontrol (Fix: "Cannot GET /jestri-control")
+// Halaman Dashboard Admin (jestri-control)
 app.get('/jestri-control', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
-    
-    // Kirim data buku kosong dulu agar tidak error saat render
+    // Berikan data buku kosong agar tidak error saat render table
     res.render('admin', { buku: [] }); 
 });
 
-// 4. Proses Tambah Buku (Fix: Logout setelah tambah)
+// Proses Tambah Buku (KUNCI: Tetap di mode admin)
 app.post('/tambah-buku', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     
-    // Logika simpan database lo di sini
+    // --- Logika Simpan Database Lo Disini ---
     
-    // SETELAH BERHASIL: Balik ke panel kontrol, BUKAN ke login
+    // Setelah berhasil, arahkan balik ke dashboard admin
     res.redirect('/jestri-control');
 });
 
-// 5. Proses Hapus Buku
+// Proses Hapus Buku
 app.get('/hapus-buku/:id', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
+    
+    // --- Logika Hapus Database Lo Disini ---
+    
     res.redirect('/jestri-control');
+});
+
+// Logout
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+});
+
+// Menangani error rute tidak ditemukan
+app.use((req, res) => {
+    res.status(404).send("Halaman tidak ditemukan di server");
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server jalan di port ${PORT}`));
+app.listen(PORT, () => console.log(`Server nyala di port ${PORT}`));
 
 module.exports = app;
 
