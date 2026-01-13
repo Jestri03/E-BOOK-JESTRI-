@@ -17,36 +17,29 @@ const securityLogPath = path.join('/tmp', 'security_audit.log');
 if (!fs.existsSync(booksPath)) fs.writeFileSync(booksPath, JSON.stringify([]));
 if (!fs.existsSync(securityLogPath)) fs.writeFileSync(securityLogPath, '--- LOG KEAMANAN JESTRI ---\n');
 
+// Perisai Keamanan
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Limit ditingkatkan untuk PDF
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Sesi Keamanan
+// Konfigurasi Sesi yang Lebih Stabil untuk Vercel
 app.use(session({
-    name: 'jestri_secure_core',
-    secret: 'X-CORE-JESTRI-SUPER-ENCRYPT-999',
+    secret: 'JESTRI-SUPER-SECRET-2026',
     resave: true,
     saveUninitialized: true,
-    cookie: { httpOnly: true, maxAge: 3600000 }
+    cookie: { maxAge: 3600000 }
 }));
 
-// Konfigurasi Multer untuk PDF dan Gambar
-const upload = multer({ 
-    dest: '/tmp/', 
-    limits: { fileSize: 50 * 1024 * 1024 } // Mendukung file hingga 50MB
-});
-
+const upload = multer({ dest: '/tmp/' });
 app.use('/uploads', express.static('/tmp'));
 
-// Middleware Kunci Admin (Diperbaiki agar tidak 'Forbidden')
+// Middleware Kunci Admin (Fix Forbidden)
 const secureAdmin = (req, res, next) => {
-    if (req.session.isAdmin) {
-        return next();
-    }
-    res.status(403).send('Akses Ditolak: Silakan Login Kembali.');
+    if (req.session.isAdmin) return next();
+    res.redirect('/login-admin');
 };
 
 // --- FUNGSI WATERMARK ---
@@ -54,19 +47,13 @@ async function prosesWatermark(inputPath, originalName) {
     const existingPdfBytes = fs.readFileSync(inputPath);
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const pages = pdfDoc.getPages();
-
     pages.forEach((page) => {
         const { width, height } = page.getSize();
         page.drawText('E-BOOK JESTRI', {
-            x: width / 5,
-            y: height / 2.5,
-            size: 60,
-            color: rgb(0.8, 0.8, 0.8),
-            opacity: 0.3,
-            rotate: degrees(45),
+            x: width / 5, y: height / 2.5, size: 60,
+            color: rgb(0.8, 0.8, 0.8), opacity: 0.3, rotate: degrees(45),
         });
     });
-
     const pdfBytes = await pdfDoc.save();
     const outputPath = path.join('/tmp', 'SECURED_' + originalName);
     fs.writeFileSync(outputPath, pdfBytes);
@@ -97,30 +84,30 @@ app.get('/admin-dashboard', secureAdmin, (req, res) => {
     res.render('admin', { mode: 'dashboard', books });
 });
 
-// Perbaikan Route Secure PDF
+// Fix: Route Cek Keamanan
+app.get('/cek-keamanan-jestri', secureAdmin, (req, res) => {
+    if (fs.existsSync(securityLogPath)) {
+        const logs = fs.readFileSync(securityLogPath, 'utf8');
+        res.send(`<pre>${logs}</pre>`);
+    } else {
+        res.send("Belum ada data keamanan.");
+    }
+});
+
 app.post('/secure-pdf', secureAdmin, upload.single('pdfFile'), async (req, res) => {
     if (!req.file) return res.send("File PDF belum dipilih!");
     try {
         const securedPath = await prosesWatermark(req.file.path, req.file.originalname);
-        res.download(securedPath, (err) => {
-            if (err) console.log("Download error:", err);
-            if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path); // Hapus file temporary
-        });
-    } catch (err) { 
-        console.error(err);
-        res.send("Gagal memproses PDF. Pastikan file tidak diproteksi password."); 
-    }
+        res.download(securedPath);
+    } catch (err) { res.send("Gagal memproses PDF."); }
 });
 
 app.post('/add-book', secureAdmin, upload.single('image'), (req, res) => {
     try {
         const books = JSON.parse(fs.readFileSync(booksPath, 'utf8'));
         books.push({
-            id: Date.now(),
-            title: req.body.title,
-            genre: req.body.genre,
-            price: req.body.price,
-            description: req.body.description || 'Admin',
+            id: Date.now(), title: req.body.title, genre: req.body.genre,
+            price: req.body.price, description: req.body.description || 'Admin',
             image: req.file ? req.file.filename : ''
         });
         fs.writeFileSync(booksPath, JSON.stringify(books));
@@ -133,6 +120,6 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-app.listen(PORT, () => console.log('🛡️ Website Secured & PDF Fixed'));
+app.listen(PORT, () => console.log('🛡️ Website Secured'));
 module.exports = app;
 
