@@ -18,22 +18,18 @@
                 <input type="password" name="password" placeholder="Password Admin" required>
                 <button type="submit" class="btn">MASUK</button>
             </form>
-        <% } else if (mode === 'menu-selection') { %>
-            <h2>Menu Admin</h2>
-            <a href="/admin/katalog" class="btn" style="display:block; text-decoration:none; margin-bottom:10px;">KELOLA KATALOG</a>
-            <a href="/" style="color:#666; text-decoration:none;">Lihat Web</a>
         <% } else if (mode === 'katalog') { %>
             <h2>Tambah Buku</h2>
             <form>
                 <input type="text" placeholder="Judul Buku">
-                <select><option>Fiksi</option><option>Edukasi</option></select>
+                <select><option>Fiksi</option><option>Edukasi</option><option>Bisnis</option></select>
                 <input type="text" placeholder="Harga (Contoh: 2.800)">
                 <input type="text" placeholder="Nama Penulis">
                 <p style="text-align:left; font-size:12px; color:#888;">Pilih Sampul (Galeri):</p>
                 <input type="file" accept="image/*">
                 <button type="button" class="btn" onclick="alert('Berhasil!')">PUBLIKASIKAN</button>
             </form>
-            <a href="/jestri-control" style="display:block; margin-top:15px; color:#007bff; text-decoration:none;">Kembali</a>
+            <a href="/jestri-control" style="display:block; margin-top:15px; color:#666; text-decoration:none;">Log Out</a>
         <% } %>
     </div>
 </body>

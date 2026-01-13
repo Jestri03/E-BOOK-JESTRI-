@@ -17,16 +17,12 @@
         .overlay { position: fixed; display: none; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; }
         .overlay.active { display: block; }
 
+        /* Pencarian tetap ada sesuai permintaan */
         .search-area { padding: 20px; text-align: center; }
-        .search-box { width: 85%; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
-        .card { background: white; margin: 15px; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .card img { width: 100%; height: auto; }
-        .card-content { padding: 15px; text-align: left; }
-        .price { color: #28a745; font-size: 1.4em; font-weight: bold; margin: 10px 0; }
-        .btn-buy { background: #007bff; color: white; display: block; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+        .search-box { width: 85%; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 
         .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 999; }
-        .fab { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 24px; }
+        .fab { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
@@ -42,19 +38,10 @@
         <a href="https://link.dana.id/qr/5n7t9o22" class="btn-donate">DONATE</a>
     </div>
 
-    <div class="search-area"><input type="text" class="search-box" placeholder="Cari Buku..."></div>
-
-    <% books.forEach(book => { %>
-    <div class="card">
-        <img src="<%= book.image %>" onerror="this.src='https://via.placeholder.com/400x500?text=E-BOOK+JESTRI'">
-        <div class="card-content">
-            <h3><%= book.title %></h3>
-            <p><%= book.description %></p>
-            <div class="price">Rp <%= book.price %></div>
-            <a href="https://wa.me/6285189415489" class="btn-buy">Beli Sekarang</a>
-        </div>
+    <div class="search-area">
+        <p style="margin-bottom: 10px; font-weight: bold; color: #444;">Cari Buku / Penulis</p>
+        <input type="text" class="search-box" placeholder="Ketik judul buku...">
     </div>
-    <% }) %>
 
     <div class="fab-container">
         <a href="https://www.instagram.com/jesssstri?igsh=Ym1nb253bmtoZGd3" class="fab" style="background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285aeb 90%);"><i class="fab fa-instagram"></i></a>
