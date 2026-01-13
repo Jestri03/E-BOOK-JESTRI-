@@ -7,8 +7,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 
-// Data Buku
-const books = [{ 
+const BOOKS = [{ 
     id: "1", 
     title: "The Psychology of Money", 
     price: "2.800", 
@@ -16,11 +15,13 @@ const books = [{
     description: "Penulis: Morgan Housel"
 }];
 
+// Route Pembeli
 app.get('/', (req, res) => {
-    res.render('index', { books: books });
+    res.render('index', { books: BOOKS });
 });
 
-app.get('/login-admin', (req, res) => {
+// Link Khusus Admin (Terpisah)
+app.get('/jestri-control', (req, res) => {
     res.render('admin', { mode: 'login' });
 });
 
@@ -28,12 +29,13 @@ app.post('/admin-dashboard', (req, res) => {
     if (req.body.password === 'JESTRI0301209') {
         res.render('admin', { mode: 'menu-selection' });
     } else {
-        res.send("Password Salah!");
+        res.send("<script>alert('Password Salah!'); window.location='/jestri-control';</script>");
     }
 });
 
-app.get('/admin/katalog', (req, res) => res.render('admin', { mode: 'katalog', books: books }));
-app.get('/admin/watermark-lab', (req, res) => res.render('admin', { mode: 'watermark-lab' }));
+app.get('/admin/katalog', (req, res) => {
+    res.render('admin', { mode: 'katalog', books: BOOKS });
+});
 
 module.exports = app;
 
