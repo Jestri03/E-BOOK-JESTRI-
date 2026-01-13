@@ -3,11 +3,14 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background: #eef2f7; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .box { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center; }
+        body { font-family: sans-serif; background: #eef2f7; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .box { background: white; width: 90%; max-width: 400px; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .btn { background: #007bff; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-delete { background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+        .book-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
     </style>
 </head>
 <body>
@@ -32,6 +35,24 @@
             <a href="/jestri-control" style="display:block; margin-top:15px; color:#666; text-decoration:none;">Log Out</a>
         <% } %>
     </div>
+
+    <% if (mode === 'katalog') { %>
+    <div class="box">
+        <h3 style="margin-top:0;"><i class="fa fa-trash"></i> Kelola Katalog</h3>
+        <p style="font-size: 12px; color: #888;">Klik hapus untuk membuang buku</p>
+        <div style="margin-top: 15px;">
+            <% books.forEach(book => { %>
+                <div class="book-item">
+                    <div>
+                        <strong style="font-size: 14px;"><%= book.title %></strong><br>
+                        <span style="font-size: 12px; color: #666;"><%= book.description %></span>
+                    </div>
+                    <button class="btn-delete" onclick="confirm('Hapus buku ini?') ? alert('Terhapus!') : null">Hapus</button>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+    <% } %>
 </body>
 </html>
 
