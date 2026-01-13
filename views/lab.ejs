@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JESTRI WATERMARK LAB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .lab-box { background: #2d2d2d; width: 90%; max-width: 450px; padding: 30px; border-radius: 20px; border: 2px dashed #007bff; text-align: center; }
+        .icon { font-size: 50px; color: #007bff; margin-bottom: 20px; }
+        input[type="file"] { background: #3d3d3d; padding: 20px; width: 100%; border-radius: 10px; margin: 20px 0; color: white; }
+        .btn-lab { background: #007bff; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .info { font-size: 12px; color: #aaa; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="lab-box">
+        <div class="icon"><i class="fa fa-flask"></i></div>
+        <h2>WATERMARK LAB</h2>
+        <p>Masukkan PDF asli untuk memberi tanda <br><strong>"E-BOOK JESTRI"</strong></p>
+        
+        <form action="/process-pdf" method="POST" enctype="multipart/form-data">
+            <input type="file" name="pdfFile" accept="application/pdf" required>
+            <button type="submit" class="btn-lab">PROSES & DOWNLOAD</button>
+        </form>
+
+        <p class="info"><i class="fa fa-shield-alt"></i> Watermark akan muncul otomatis di setiap halaman PDF.</p>
+        <a href="/" style="color: #555; text-decoration: none; font-size: 12px; display: block; margin-top: 20px;">Kembali ke Beranda</a>
+    </div>
+</body>
+</html>
+
