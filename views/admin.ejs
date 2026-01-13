@@ -3,78 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - E-Book Jestri</title>
+    <title>Dashboard Admin - E-Book Jestri</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-        :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #e74c3c; --white: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; }
-        .container { max-width: 800px; margin: 50px auto; background: var(--white); padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; margin-bottom: 30px; }
-        .btn { display: block; width: 100%; padding: 15px; margin: 15px 0; text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.3s; border: none; cursor: pointer; font-size: 16px; }
-        .btn-katalog { background: var(--primary); color: white; }
-        .btn-watermark { background: var(--secondary); color: white; }
-        .btn-logout { background: var(--accent); color: white; margin-top: 30px; }
-        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
-        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .card { border: 1px solid #eee; padding: 15px; border-radius: 10px; margin-bottom: 10px; background: #fafafa; }
-        .status-msg { padding: 10px; background: #d4edda; color: #155724; border-radius: 5px; text-align: center; margin-bottom: 20px; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
+        .btn { display: block; padding: 15px; text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; transition: 0.3s; cursor: pointer; border: none; font-size: 16px; }
+        .btn-blue { background: #007bff; color: white; }
+        .btn-green { background: #28a745; color: white; }
+        .btn-red { background: #dc3545; color: white; margin-top: 20px; }
+        .form-group { margin-bottom: 15px; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .back-link { display: block; text-align: center; margin-top: 15px; color: #666; text-decoration: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-
     <% if (mode === 'login') { %>
         <h2>Login Admin Jestri</h2>
         <form action="/admin-dashboard" method="POST">
             <div class="form-group">
-                <label>Password Rahasia</label>
-                <input type="password" name="password" placeholder="Masukkan password..." required>
+                <input type="password" name="password" placeholder="Masukkan Password" required>
             </div>
-            <button type="submit" class="btn btn-katalog">MASUK KE SISTEM</button>
+            <button type="submit" class="btn btn-blue">MASUK</button>
         </form>
 
     <% } else if (mode === 'menu-selection') { %>
-        <h2>Pilih Dashboard Utama</h2>
-        <p style="text-align: center; color: #666;">Silakan pilih tugas yang ingin dilakukan:</p>
-        <a href="/admin/katalog" class="btn btn-katalog">📂 KELOLA KATALOG TOKO</a>
-        <a href="/admin/watermark-lab" class="btn btn-watermark">🧪 LABORATORIUM WATERMARK (PDF)</a>
-        <a href="/logout" class="btn btn-logout">KELUAR</a>
+        <h2>Pilih Dashboard</h2>
+        <div class="menu-grid">
+            <a href="/admin/katalog" class="btn btn-blue">📂 Kelola Katalog Buku</a>
+            <a href="/admin/watermark-lab" class="btn btn-green">🧪 Watermark Lab (PDF)</a>
+        </div>
+        <a href="/logout" class="btn btn-red">Keluar</a>
 
     <% } else if (mode === 'katalog') { %>
-        <h2>📂 Kelola Katalog Buku</h2>
-        <div class="card">
-            <h3>Tambah Buku Baru</h3>
-            <form action="/add-book" method="POST" enctype="multipart/form-data">
-                <input type="text" name="title" placeholder="Judul Buku" required style="margin-bottom: 10px;">
-                <input type="text" name="genre" placeholder="Genre" required style="margin-bottom: 10px;">
-                <input type="text" name="price" placeholder="Harga (Contoh: 2.800)" required style="margin-bottom: 10px;">
-                <textarea name="description" placeholder="Deskripsi/Penulis" rows="3" style="margin-bottom: 10px;"></textarea>
-                <label>Foto Sampul:</label>
-                <input type="file" name="image" accept="image/*">
-                <button type="submit" class="btn btn-katalog">TAMBAHKAN KE TOKO</button>
-            </form>
-        </div>
-        <a href="/admin-dashboard-back" onclick="event.preventDefault(); window.history.back();" style="color: #666; text-decoration: none; display: block; text-align: center; margin-top: 20px;">⬅ Kembali ke Menu Utama</a>
+        <h2>📂 Kelola Katalog</h2>
+        <form action="/add-book" method="POST" enctype="multipart/form-data">
+            <input type="text" name="title" placeholder="Judul Buku" required style="margin-bottom:10px;">
+            <input type="text" name="price" placeholder="Harga (Contoh: 2.800)" required style="margin-bottom:10px;">
+            <input type="file" name="image" accept="image/*">
+            <button type="submit" class="btn btn-blue" style="margin-top:10px;">Tambah Buku</button>
+        </form>
+        <a href="/admin-dashboard-relogin" class="back-link">⬅ Kembali ke Menu Utama</a>
 
     <% } else if (mode === 'watermark-lab') { %>
         <h2>🧪 Watermark Lab</h2>
-        <div class="card">
-            <p>Gunakan fitur ini untuk memberi tanda "E-BOOK JESTRI SECURED" pada file PDF pembeli secara otomatis.</p>
-            <form action="/process-watermark" method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label>Pilih File PDF Mentah:</label>
-                    <input type="file" name="pdfFile" accept="application/pdf" required>
-                </div>
-                <button type="submit" class="btn btn-watermark">PROSES & DOWNLOAD HASIL</button>
-            </form>
-        </div>
-        <p style="font-size: 12px; color: #999; text-align: center;">Note: Proses ini dilakukan di server terpisah untuk menjaga kecepatan website.</p>
-        <a href="/admin-dashboard-back" onclick="event.preventDefault(); window.history.back();" style="color: #666; text-decoration: none; display: block; text-align: center; margin-top: 20px;">⬅ Kembali ke Menu Utama</a>
+        <p style="text-align: center; font-size: 14px; color: #666;">Dashboard khusus pemrosesan keamanan PDF.</p>
+        <form action="/process-watermark" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Upload File PDF:</label>
+                <input type="file" name="pdfFile" accept="application/pdf" required>
+            </div>
+            <button type="submit" class="btn btn-green">PROSES & DOWNLOAD</button>
+        </form>
+        <a href="/admin-dashboard-relogin" class="back-link">⬅ Kembali ke Menu Utama</a>
     <% } %>
-
 </div>
 
 </body>
