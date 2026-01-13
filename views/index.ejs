@@ -17,13 +17,12 @@
         .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: white; overflow-x: hidden; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
         .sidebar-content { padding-top: 10px; }
         .close-btn { font-size: 24px; padding: 10px 20px; cursor: pointer; color: #ff4d4d; display: block; text-align: right; }
-        
-        .menu-item { padding: 12px 25px; text-decoration: none; font-size: 15px; color: #333; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f5f5f5; }
+        .menu-item { padding: 12px 25px; text-decoration: none; font-size: 15px; color: #333; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #f5f5f5; cursor: pointer; }
         .menu-header { padding: 15px 25px 5px; font-size: 12px; font-weight: bold; color: #007bff; text-transform: uppercase; letter-spacing: 1px; }
 
         /* Donate Section */
         .donate-container { text-align: center; padding: 25px 0; }
-        .btn-donate { background: #ff4d4d; color: white; padding: 12px 35px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3); }
+        .btn-donate { background: #ff4d4d; color: white; padding: 12px 35px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3); border: none; cursor: pointer; font-size: 16px; }
 
         /* Search Section */
         .search-section { text-align: center; padding: 0 20px 20px; }
@@ -32,7 +31,7 @@
         .search-box input { flex: 1; padding: 14px; border: none; outline: none; font-size: 16px; }
         .search-box button { background: #444; color: white; border: none; padding: 0 18px; cursor: pointer; }
 
-        /* Footer Navigasi */
+        /* Footer Sosmed */
         .footer-nav { position: fixed; bottom: 0; width: 100%; background: #1a1a1a; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
         .footer-nav a { text-decoration: none; color: #fff; font-size: 12px; display: flex; flex-direction: column; align-items: center; opacity: 0.8; }
         .footer-nav i { font-size: 24px; margin-bottom: 4px; }
@@ -48,16 +47,16 @@
             </a>
             
             <div class="menu-header">Genre</div>
-            <a href="#" class="menu-item">Semua Buku</a>
-            <a href="#" class="menu-item">Fiksi</a>
-            <a href="#" class="menu-item">Edukasi</a>
-            <a href="#" class="menu-item">Teknologi</a>
-            <a href="#" class="menu-item">Bisnis</a>
+            <a onclick="menuFilter('Semua Buku')" class="menu-item">Semua Buku</a>
+            <a onclick="menuFilter('Fiksi')" class="menu-item">Fiksi</a>
+            <a onclick="menuFilter('Edukasi')" class="menu-item">Edukasi</a>
+            <a onclick="menuFilter('Teknologi')" class="menu-item">Teknologi</a>
+            <a onclick="menuFilter('Bisnis')" class="menu-item">Bisnis</a>
 
             <div class="menu-header">Lainnya</div>
-            <a href="#" class="menu-item"><i class="fa fa-search"></i> Mencari</a>
-            <a href="#" class="menu-item"><i class="fa fa-bolt"></i> Rilisan Baru</a>
-            <a href="#" class="menu-item"><i class="fa fa-pen-nib"></i> Penulis</a>
+            <a onclick="fokusCari()" class="menu-item"><i class="fa fa-search"></i> Mencari</a>
+            <a onclick="menuFilter('Rilisan Baru')" class="menu-item"><i class="fa fa-bolt"></i> Rilisan Baru</a>
+            <a onclick="menuFilter('Penulis')" class="menu-item"><i class="fa fa-pen-nib"></i> Penulis</a>
         </div>
     </div>
 
@@ -67,7 +66,7 @@
     </div>
 
     <div class="donate-container">
-        <a href="#" class="btn-donate">
+        <a href="https://link.dana.id/qr/8u8o6t3" target="_blank" class="btn-donate">
             <i class="fa fa-heart"></i> DONATE
         </a>
     </div>
@@ -75,8 +74,8 @@
     <div class="search-section">
         <span class="search-label">Cari Buku / Penulis</span>
         <div class="search-box">
-            <input type="text" placeholder="Ketik judul buku...">
-            <button><i class="fa fa-search"></i></button>
+            <input type="text" id="searchInput" placeholder="Ketik judul buku...">
+            <button onclick="fokusCari()"><i class="fa fa-search"></i></button>
         </div>
     </div>
 
@@ -94,6 +93,21 @@
     <script>
         function openNav() { document.getElementById("mySidebar").style.width = "260px"; }
         function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+
+        // Fungsi agar menu Mencari langsung fokus ke kotak input
+        function fokusCari() {
+            closeNav();
+            const input = document.getElementById("searchInput");
+            input.focus();
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Fungsi untuk menu Genre dan Lainnya
+        function menuFilter(tag) {
+            closeNav();
+            alert("Membuka: " + tag);
+            // Kamu bisa menambahkan logika filter buku di sini nanti
+        }
     </script>
 
 </body>
