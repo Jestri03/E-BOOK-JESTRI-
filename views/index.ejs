@@ -5,48 +5,78 @@
     <title>E-BOOK JESTRI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background: #f8f9fa; margin: 0; text-align: center; }
-        .header { background: white; padding: 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        .menu-btn { background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; }
-        .btn-donate { background: #ff4d6d; color: white; padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        .card { background: white; margin: 15px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .card img { width: 100%; border-radius: 8px; margin-bottom: 10px; }
-        .price { color: #28a745; font-size: 1.3em; font-weight: bold; margin: 10px 0; }
-        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 12px; }
-        .fab { width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .bg-ig { background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; }
+        /* Header */
+        .header { background: white; padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .menu-icon { font-size: 24px; color: #333; cursor: pointer; }
+        .logo-text { font-weight: bold; font-size: 18px; color: #007bff; }
+        .btn-donate { background: #ff4d6d; color: white; padding: 8px 15px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 13px; }
+
+        /* Sidebar Menu seperti di Video */
+        .sidebar { position: fixed; left: -250px; top: 0; width: 250px; height: 100%; background: #333; transition: 0.3s; z-index: 2000; padding-top: 60px; }
+        .sidebar a { display: block; padding: 15px 25px; color: white; text-decoration: none; font-size: 18px; border-bottom: 1px solid #444; }
+        .sidebar.active { left: 0; }
+        .overlay { position: fixed; display: none; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; }
+        .overlay.active { display: block; }
+
+        /* Card Buku */
+        .search-area { padding: 20px; text-align: center; }
+        .search-box { width: 85%; padding: 12px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
+        .card { background: white; margin: 15px; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: auto; }
+        .card-content { padding: 15px; text-align: left; }
+        .price { color: #28a745; font-size: 1.4em; font-weight: bold; margin: 10px 0; }
+        .btn-buy { background: #007bff; color: white; display: block; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+
+        /* Floating Buttons */
+        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 999; }
+        .fab { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .bg-ig { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); }
         .bg-wa { background: #25d366; }
     </style>
 </head>
 <body>
+
+    <div class="sidebar" id="sidebar">
+        <a href="/"><i class="fa fa-home"></i> Beranda</a>
+        <a href="/login-admin"><i class="fa fa-user-shield"></i> Admin Panel</a>
+        <a href="https://wa.me/6285189415489"><i class="fa fa-headset"></i> Hubungi Kami</a>
+    </div>
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
     <div class="header">
-        <button class="menu-btn" onclick="alert('Menu Terbuka')">Menu</button>
-        <h3 style="margin:0; flex-grow:1; text-align:center;">E-BOOK JESTRI</h3>
+        <i class="fa fa-bars menu-icon" onclick="toggleMenu()"></i>
+        <div class="logo-text">E-BOOK JESTRI</div>
         <a href="https://link.dana.id/qr/5n7t9o22" class="btn-donate"><i class="fa fa-heart"></i> DONATE</a>
     </div>
 
-    <div style="padding: 20px;">
-        <p style="font-weight: bold;">Cari Buku / Penulis</p>
-        <div style="display:flex; justify-content:center;">
-            <input type="text" placeholder="Ketik judul buku..." style="width:70%; padding:10px; border:1px solid #ccc; border-radius:5px 0 0 5px;">
-            <button style="padding:10px; background:#333; color:white; border:none; border-radius:0 5px 5px 0;"><i class="fa fa-search"></i></button>
-        </div>
+    <div class="search-area">
+        <input type="text" class="search-box" placeholder="Cari Judul Buku atau Penulis...">
     </div>
 
     <% books.forEach(book => { %>
-        <div class="card">
-            <img src="<%= book.image %>" onerror="this.src='https://via.placeholder.com/300x400?text=Cover+Buku'">
-            <h3><%= book.title %></h3>
-            <p><%= book.description %></p>
-            <p class="price">Rp <%= book.price %></p>
-            <a href="https://wa.me/6285189415489" style="background:#007bff; color:white; padding:12px; display:block; text-decoration:none; border-radius:8px; font-weight:bold;">Beli Sekarang</a>
+    <div class="card">
+        <img src="<%= book.image %>" onerror="this.src='https://via.placeholder.com/400x500?text=E-BOOK+JESTRI'">
+        <div class="card-content">
+            <h3 style="margin:0"><%= book.title %></h3>
+            <p style="color:#666; font-size:14px;"><%= book.description %></p>
+            <div class="price">Rp <%= book.price %></div>
+            <a href="https://wa.me/6285189415489" class="btn-buy">Beli Sekarang</a>
         </div>
+    </div>
     <% }) %>
 
     <div class="fab-container">
         <a href="https://www.instagram.com/jesssstri?igsh=Ym1nb253bmtoZGd3" class="fab bg-ig"><i class="fab fa-instagram"></i></a>
         <a href="https://wa.me/6285189415489" class="fab bg-wa"><i class="fab fa-whatsapp"></i></a>
     </div>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+    </script>
 </body>
 </html>
 

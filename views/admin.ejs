@@ -2,49 +2,45 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
-        h2 { margin-bottom: 20px; color: #333; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn-submit { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .login-box i { font-size: 40px; color: #333; margin-bottom: 10px; }
+        body { font-family: sans-serif; background: #eef2f7; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .admin-box { background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; box-sizing: border-box; }
+        .btn-primary { background: #007bff; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-primary:hover { background: #0056b3; }
+        .status-badge { background: #e8f5e9; color: #2e7d32; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="admin-box">
         <% if (mode === 'login') { %>
-            <div class="login-box">
-                <h2 style="font-size: 24px;">Admin Panel</h2>
-                <p>E-BOOK JESTRI</p>
-                <form action="/admin-dashboard" method="POST">
-                    <input type="password" name="password" placeholder="Password Admin" required>
-                    <button type="submit" style="background:#007bff; color:white; border:none; padding:12px; width:100%; border-radius:8px; margin-top:10px">MASUK</button>
-                </form>
-            </div>
+            <i class="fa fa-user-lock" style="font-size: 50px; color: #007bff; margin-bottom: 15px;"></i>
+            <h2>Admin Login</h2>
+            <form action="/admin-dashboard" method="POST">
+                <input type="password" name="password" placeholder="Masukkan Password Rahasia" required>
+                <button type="submit" class="btn-primary">AUTHENTICATION</button>
+            </form>
+            <a href="/" style="display:block; margin-top:20px; color:#888; text-decoration:none;">Batal & Kembali</a>
 
         <% } else if (mode === 'menu-selection') { %>
-            <h2>Pilih Mode</h2>
-            <a href="/admin/katalog" style="display:block; background:#007bff; color:white; padding:15px; margin:10px; border-radius:8px; text-decoration:none">📂 KELOLA KATALOG</a>
-            <a href="/admin/watermark-lab" style="display:block; background:#28a745; color:white; padding:15px; margin:10px; border-radius:8px; text-decoration:none">🧪 WATERMARK LAB</a>
+            <div class="status-badge">SESSION ACTIVE</div>
+            <h2>Selamat Datang, Admin</h2>
+            <p style="color:#666">Silakan pilih menu manajemen</p>
+            <a href="/admin/katalog" style="display:block; background:#007bff; color:white; padding:15px; margin:10px 0; border-radius:10px; text-decoration:none; font-weight:bold;">📂 MANAJEMEN KATALOG</a>
+            <a href="/" style="display:block; background:#6c757d; color:white; padding:15px; border-radius:10px; text-decoration:none; font-weight:bold;">🏠 LIHAT WEBSITE</a>
 
         <% } else if (mode === 'katalog') { %>
-            <h2><i class="fa fa-plus-circle"></i> Tambah E-Book</h2>
-            <form action="#">
-                <input type="text" placeholder="Judul E-Book">
-                <select>
-                    <option>Fiksi</option>
-                    <option>Edukasi</option>
-                    <option>Bisnis</option>
-                </select>
-                <input type="text" placeholder="Harga (Contoh: 50.000)">
-                <textarea placeholder="Nama Penulis / Sinopsis Singkat"></textarea>
-                <p style="text-align:left; margin:5px 0">Foto Sampul (JPG/PNG)</p>
-                <input type="file">
-                <button type="button" class="btn-submit">PUBLIKASIKAN BUKU</button>
+            <h2><i class="fa fa-plus-circle"></i> Tambah Koleksi</h2>
+            <form>
+                <input type="text" placeholder="Judul Buku">
+                <input type="text" placeholder="Harga (Tanpa Rp)">
+                <textarea placeholder="Deskripsi Singkat / Penulis" rows="3"></textarea>
+                <input type="text" placeholder="URL Gambar Cover">
+                <button type="button" class="btn-primary" onclick="alert('Berhasil Dipublikasikan (Simulasi)')">PUBLIKASIKAN SEKARANG</button>
             </form>
-            <a href="/login-admin" style="display:block; margin-top:15px; color:#666; text-decoration:none">Kembali</a>
+            <a href="/login-admin" style="display:block; margin-top:20px; color:#007bff; text-decoration:none; font-weight:bold;">Kembali ke Menu</a>
         <% } %>
     </div>
 </body>
