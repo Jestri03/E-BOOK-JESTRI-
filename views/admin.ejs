@@ -1,39 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin JESTRI Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #2c3e50; color: white; }
-        .form-box { background: #34495e; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #e67e22; color: white; border: none; cursor: pointer; }
-        table { width: 100%; margin-top: 20px; border-collapse: collapse; background: white; color: black; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .box { background: white; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; background: #2980b9; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .list { margin-top: 30px; border-collapse: collapse; width: 100%; }
+        .list th, .list td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        .list th { background: #2980b9; color: white; }
+        .del-btn { color: #e74c3c; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="form-box">
-        <h2>Tambah Buku Baru</h2>
+    <div class="box">
+        <h2>🛠️ Panel Admin JESTRI</h2>
         <form action="/tambah-buku" method="POST">
             <input type="text" name="judul" placeholder="Judul Buku" required>
-            <input type="text" name="penulis" placeholder="Penulis" required>
-            <input type="number" name="harga" placeholder="Harga (Hanya Angka)" required>
+            <input type="text" name="penulis" placeholder="Nama Penulis" required>
+            <input type="number" name="harga" placeholder="Harga (Angka saja: 50000)" required>
             <input type="text" name="gambar" placeholder="Link Gambar (URL)" required>
-            <button type="submit">SIMPAN BUKU</button>
+            <button type="submit">TAMBAH BUKU SEKARANG</button>
         </form>
-        <br>
-        <a href="/" style="color: #ecf0f1;">Lihat Web Pembeli</a> | <a href="/logout" style="color: #e74c3c;">Logout</a>
+        <hr>
+        <a href="/">Lihat Website</a> | <a href="/logout">Keluar</a>
     </div>
 
-    <table>
-        <tr><th>Judul</th><th>Harga</th><th>Aksi</th></tr>
-        <% buku.forEach(item => { %>
-            <tr>
-                <td><%= item.judul %></td>
-                <td>Rp <%= Number(item.harga).toLocaleString('id-ID') %></td>
-                <td><a href="/hapus-buku/<%= item._id %>" style="color:red;">Hapus</a></td>
-            </tr>
-        <% }) %>
+    <table class="list">
+        <thead>
+            <tr><th>Judul</th><th>Harga</th><th>Aksi</th></tr>
+        </thead>
+        <tbody>
+            <% buku.forEach(item => { %>
+                <tr>
+                    <td><%= item.judul %></td>
+                    <td>Rp <%= Number(item.harga).toLocaleString('id-ID') %></td>
+                    <td><a href="/hapus-buku/<%= item._id %>" class="del-btn">Hapus</a></td>
+                </tr>
+            <% }) %>
+        </tbody>
     </table>
 </body>
 </html>
