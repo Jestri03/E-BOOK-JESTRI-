@@ -8,45 +8,49 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Kunci utama agar tidak Internal Server Error di Vercel
 app.use(cookieSession({
     name: 'session',
     keys: ['jestri-secret-0301'],
     maxAge: 24 * 60 * 60 * 1000
 }));
 
-// --- 1. MODE PEMBELI ---
-app.get('/', (req, res) => {
-    res.render('index'); 
-});
+// DATABASE SEMENTARA (Akan reset kalau server restart, tapi aman buat testing)
+let daftarBuku = [];
 
-// --- 2. LOGIN ADMIN (PASSWORD ONLY: JESTRI0301209) ---
-app.get('/login', (req, res) => {
-    res.render('login');
-});
+app.get('/', (req, res) => { res.render('index', { buku: daftarBuku }); });
+app.get('/login', (req, res) => { res.render('login'); });
 
 app.post('/admin-dashboard', (req, res) => {
-    const { password } = req.body;
-    if (password === 'JESTRI0301209') {
+    if (req.body.password === 'JESTRI0301209') {
         req.session.isLoggedIn = true;
         res.redirect('/jestri-control');
     } else {
-        res.send("<script>alert('Password Salah!'); window.location='/login';</script>");
+        res.send("<script>alert('Salah!'); window.location='/login';</script>");
     }
 });
 
-// --- 3. DASHBOARD ADMIN KEREN (/jestri-control) ---
+// HALAMAN ADMIN
 app.get('/jestri-control', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
-    // Contoh data buku, lo bisa ganti dengan database nanti
-    const buku = []; 
-    res.render('admin', { buku });
+    res.render('admin', { buku: daftarBuku });
 });
 
-app.get('/logout', (req, res) => {
-    req.session = null;
-    res.redirect('/');
+// FITUR TAMBAH BUKU
+app.post('/tambah-buku', (req, res) => {
+    if (!req.session.isLoggedIn) return res.sendStatus(403);
+    const { judul, penulis, harga, gambar } = req.body;
+    daftarBuku.push({ id: Date.now(), judul, penulis, harga, gambar });
+    res.redirect('/jestri-control');
 });
+
+// FITUR HAPUS BUKU
+app.get('/hapus-buku/:id', (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect('/login');
+    daftarBuku = daftarBuku.filter(b => b.id != req.params.id);
+    res.redirect('/jestri-control');
+});
+
+app.get('/logout', (req, res) => { req.session = null; res.redirect('/'); });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Server Ready'));
