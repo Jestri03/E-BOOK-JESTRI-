@@ -1,28 +1,32 @@
 const express = require('express');
-const session = require('express-session');
+const cookieSession = require('cookie-session');
 const path = require('path');
 const app = express();
 
+// Konfigurasi Standar
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Fix Internal Server Error
-app.use(session({
-    secret: 'jestri-ebook-secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: false } 
+// Ganti express-session dengan cookie-session (Lebih stabil di Vercel)
+app.use(cookieSession({
+    name: 'session',
+    keys: ['jestri-secret-key'],
+    maxAge: 24 * 60 * 60 * 1000 // Sesi 24 jam
 }));
 
-// --- TAMPILAN PEMBELI (TETAP SESUAI VIDEO) ---
+// ==========================================
+// 1. TAMPILAN PEMBELI (SESUAI VIDEO LO)
+// ==========================================
 app.get('/', (req, res) => {
-    // Memanggil index.ejs (Menu Genre lo aman di sini)
+    // Memanggil index.ejs agar menu genre lo muncul lagi
     res.render('index'); 
 });
 
-// --- TAMPILAN ADMIN ---
+// ==========================================
+// 2. TAMPILAN ADMIN (JESTRI CONTROL)
+// ==========================================
 app.get('/login', (req, res) => {
     res.render('login');
 });
@@ -39,11 +43,17 @@ app.post('/admin-dashboard', (req, res) => {
 
 app.get('/jestri-control', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
+    // Buku diisi [] agar tabel tidak error saat awal kosong
     res.render('admin', { buku: [] }); 
 });
 
+app.get('/logout', (req, res) => {
+    req.session = null;
+    res.redirect('/');
+});
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Ready'));
+app.listen(PORT, () => console.log('Server Ready!'));
 
 module.exports = app;
 
