@@ -4,9 +4,6 @@
     { "src": "server.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/jestri-control", "dest": "server.js" },
-    { "src": "/admin-dashboard", "dest": "server.js" },
-    { "src": "/jestri-lab", "dest": "server.js" },
     { "src": "/(.*)", "dest": "server.js" }
   ]
 }
