@@ -9,15 +9,20 @@ mongoose.connect('mongodb+srv://JESTRI:JESTRI0301209@cluster0.tprp2r7.mongodb.ne
     maxPoolSize: 10
 }).catch(err => console.log("DB Error"));
 
+// UPDATE MODEL: Tambah field 'penulis'
 const Buku = mongoose.model('Buku', { 
-    judul: String, harga: Number, gambar: String, genre: { type: String, default: 'Semua' } 
+    judul: String, 
+    penulis: { type: String, default: 'Anonim' },
+    harga: Number, 
+    gambar: String, 
+    genre: { type: String, default: 'Semua' } 
 });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieSession({ name: 'session', keys: ['jestri-key'], maxAge: 24 * 60 * 60 * 1000 }));
 
-// --- API ENDPOINT (Zero Latency) ---
+// --- API ENDPOINT ---
 app.get('/api/buku', async (req, res) => {
     try {
         const { genre, search } = req.query;
@@ -34,10 +39,11 @@ app.get('/api/buku', async (req, res) => {
         }
 
         const html = data.map(b => `
-            <div class="card" onclick="location.href='https://wa.me/6285189415489?text=Halo%20Admin,%20saya%20mau%20order%20buku:%20${encodeURIComponent(b.judul)}'">
+            <div class="card" onclick="location.href='https://wa.me/6285189415489?text=Halo%20Admin,%20saya%20mau%20order%20buku:%20${encodeURIComponent(b.judul)}%20karya%20${encodeURIComponent(b.penulis)}'">
                 <img src="${b.gambar}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=No+Cover'">
                 <div class="card-info">
                     <h3>${b.judul}</h3>
+                    <p style="font-size:0.75rem; color:#888; margin: -2px 0 5px 0;">${b.penulis}</p>
                     <div class="card-price">Rp ${Number(b.harga).toLocaleString('id-ID')}</div>
                 </div>
             </div>`).join('');
@@ -88,7 +94,7 @@ app.get('/', async (req, res) => {
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; min-height: 300px; }
         .card { background: #fff; border-radius: 20px; animation: fadeIn 0.3s ease; }
         .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.06); }
-        .card-info h3 { font-size: 0.85rem; margin: 10px 0 5px; font-weight: 700; height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .card-info h3 { font-size: 0.85rem; margin: 10px 0 2px; font-weight: 700; height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
         .card-price { color: var(--green); font-weight: 800; font-size: 0.9rem; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -123,10 +129,11 @@ app.get('/', async (req, res) => {
         <input type="text" id="searchInput" class="search-box" placeholder="Cari judul buku...">
         <div class="grid" id="bookGrid">
             ${initialData.map(b => `
-                <div class="card" onclick="location.href='https://wa.me/6285189415489?text=Order%20${encodeURIComponent(b.judul)}'">
+                <div class="card" onclick="location.href='https://wa.me/6285189415489?text=Order%20${encodeURIComponent(b.judul)}%20karya%20${encodeURIComponent(b.penulis)}'">
                     <img src="${b.gambar}">
                     <div class="card-info">
                         <h3>${b.judul}</h3>
+                        <p style="font-size:0.75rem; color:#888; margin: -2px 0 5px 0;">${b.penulis}</p>
                         <div class="card-price">Rp ${b.harga.toLocaleString('id-ID')}</div>
                     </div>
                 </div>`).join('')}
@@ -176,7 +183,7 @@ app.get('/', async (req, res) => {
 </body></html>`);
 });
 
-// --- ADMIN DASHBOARD (OPTIMAL MODE) ---
+// --- ADMIN DASHBOARD (DENGAN NAMA PENULIS) ---
 app.get('/login', (req, res) => {
     res.send('<body style="display:flex;justify-content:center;align-items:center;height:100vh;background:#f4f4f4;font-family:sans-serif;margin:0"><form action="/login" method="POST" style="background:#fff;padding:40px;border-radius:30px;width:90%;max-width:400px;box-shadow:0 15px 35px rgba(0,0,0,0.1)"> <div style="text-align:center;margin-bottom:20px"><i class="fa-solid fa-user-shield" style="font-size:3rem;color:#2e86de"></i></div><h2 style="text-align:center;margin-bottom:30px">JESTRI ADMIN</h2><input type="password" name="pw" placeholder="Password Rahasia" autofocus style="width:100%;padding:18px;margin-bottom:20px;border-radius:15px;border:1px solid #ddd;font-size:1rem;outline:none"><button style="width:100%;padding:18px;background:#000;color:#fff;border:none;border-radius:15px;font-weight:800;font-size:1rem;cursor:pointer">MASUK KE DASHBOARD</button></form></body>');
 });
@@ -200,16 +207,15 @@ app.get('/admin', async (req, res) => {
         .form-card { background: #fff; padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 30px; }
         .form-card h3 { margin-top: 0; margin-bottom: 20px; color: #2e86de; }
         
-        input, select { width: 100%; padding: 16px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #eee; font-size: 1rem; box-sizing: border-box; background: #fafafa; }
+        input, select { width: 100%; padding: 16px; margin-bottom: 12px; border-radius: 12px; border: 1px solid #eee; font-size: 1rem; box-sizing: border-box; background: #fafafa; }
         input:focus { border-color: #2e86de; background: #fff; outline: none; }
         
-        .btn-add { width: 100%; padding: 18px; background: #2e86de; color: #fff; border: none; border-radius: 15px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; }
-        .btn-add:active { transform: scale(0.98); background: #1b6ca8; }
+        .btn-add { width: 100%; padding: 18px; background: #2e86de; color: #fff; border: none; border-radius: 15px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
 
         .book-list { display: grid; gap: 12px; }
         .book-item { background: #fff; padding: 15px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; }
-        .book-info b { display: block; font-size: 1rem; color: #333; margin-bottom: 4px; }
-        .book-info span { font-size: 0.85rem; color: #999; font-weight: 600; }
+        .book-info b { display: block; font-size: 1rem; color: #333; margin-bottom: 2px; }
+        .book-info span { font-size: 0.8rem; color: #999; font-weight: 600; }
         
         .btn-del { color: #ff4757; text-decoration: none; font-weight: 800; font-size: 0.85rem; padding: 10px; border: 1px solid #ffeef0; border-radius: 10px; background: #fff5f6; }
     </style>
@@ -224,6 +230,7 @@ app.get('/admin', async (req, res) => {
             <h3><i class="fa-solid fa-plus-circle"></i> Tambah Buku Baru</h3>
             <form action="/add" method="POST">
                 <input name="judul" placeholder="Judul Buku" required>
+                <input name="penulis" placeholder="Nama Penulis" required>
                 <input name="harga" type="number" placeholder="Harga (Contoh: 15000)" required>
                 <input name="gambar" placeholder="Link URL Gambar" required>
                 <select name="genre">
@@ -239,7 +246,7 @@ app.get('/admin', async (req, res) => {
                 <div class="book-item">
                     <div class="book-info">
                         <b>${x.judul}</b>
-                        <span>${x.genre} • Rp ${x.harga.toLocaleString('id-ID')}</span>
+                        <span>${x.penulis} • ${x.genre} • Rp ${x.harga.toLocaleString('id-ID')}</span>
                     </div>
                     <a href="/del/${x._id}" class="btn-del" onclick="return confirm('Hapus buku ini?')"><i class="fa-solid fa-trash"></i></a>
                 </div>`).join('')}
@@ -247,11 +254,10 @@ app.get('/admin', async (req, res) => {
     </body></html>`);
 });
 
-// --- FIX REDIRECT LOGIC ---
 app.post('/add', async (req, res) => { 
     if(req.session.admin) {
         await new Buku(req.body).save(); 
-        res.redirect('/admin'); // Tetap di halaman admin setelah nambah
+        res.redirect('/admin'); 
     } else {
         res.redirect('/login');
     }
@@ -260,7 +266,7 @@ app.post('/add', async (req, res) => {
 app.get('/del/:id', async (req, res) => { 
     if(req.session.admin) {
         await Buku.findByIdAndDelete(req.params.id); 
-        res.redirect('/admin'); // Tetap di halaman admin setelah hapus
+        res.redirect('/admin'); 
     } else {
         res.redirect('/login');
     }
