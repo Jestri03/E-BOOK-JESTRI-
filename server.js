@@ -8,19 +8,20 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Menggunakan cookie-session agar stabil di Vercel
 app.use(cookieSession({
     name: 'session',
-    keys: ['jestri-secret-key'],
+    keys: ['jestri-secret-key-0301'],
     maxAge: 24 * 60 * 60 * 1000 
 }));
 
-// Tampilan Pembeli
+// TAMPILAN PEMBELI (Halaman Utama)
 app.get('/', (req, res) => { res.render('index'); });
 
-// Halaman Login Admin
+// HALAMAN LOGIN (Tampilan Keren)
 app.get('/login', (req, res) => { res.render('login'); });
 
-// Proses Login (Cukup Password Saja)
+// PROSES LOGIN (Hanya Password)
 app.post('/admin-dashboard', (req, res) => {
     const { password } = req.body;
     if (password === 'JESTRI0301209') {
@@ -31,15 +32,10 @@ app.post('/admin-dashboard', (req, res) => {
     }
 });
 
-// Panel Kontrol Admin
+// DASHBOARD ADMIN
 app.get('/jestri-control', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
     res.render('admin', { buku: [] }); 
-});
-
-app.get('/logout', (req, res) => {
-    req.session = null;
-    res.redirect('/');
 });
 
 const PORT = process.env.PORT || 3000;
