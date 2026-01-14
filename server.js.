@@ -1,56 +1,97 @@
 const express = require('express');
-const multer = require('multer');
-const fs = require('fs');
+const cookieSession = require('cookie-session');
+const mongoose = require('mongoose');
 const path = require('path');
 const app = express();
-const port = 3000;
 
-// Konfigurasi Upload
-const storage = multer.diskStorage({
-    destination: 'public/uploads/',
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+// --- LINK KONEKSI FINAL (SUDAH TERMASUK PASSWORD JESTRI0301209) ---
+const mongoURI = 'mongodb+srv://JESTRI:JESTRI0301209@cluster0.tprp2r7.mongodb.net/ebook_jestri?retryWrites=true&w=majority&appName=Cluster0';
+
+mongoose.connect(mongoURI)
+    .then(() => console.log('Database Connected!'))
+    .catch(err => console.error('MongoDB Error:', err));
+
+// Skema Data Buku
+const Buku = mongoose.model('Buku', {
+    judul: String, 
+    penulis: String, 
+    harga: String, 
+    gambar: String
+});
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Session agar tidak crash di Vercel
+app.use(cookieSession({
+    name: 'session',
+    keys: ['jestri-secret-key-99'],
+    maxAge: 24 * 60 * 60 * 1000 
+}));
+
+// --- 1. HALAMAN UTAMA PEMBELI ---
+app.get('/', async (req, res) => {
+    try {
+        const listBuku = await Buku.find();
+        // Kalau berhasil, render index.ejs dengan data buku
+        res.render('index', { buku: listBuku });
+    } catch (err) {
+        // Ini pesan yang tadi muncul di Chrome lo
+        res.send("Error memuat data pembeli: " + err.message);
     }
 });
-const upload = multer({ storage: storage });
 
-app.set('view engine', 'ejs');
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
-
-// Database dummy
-let books = [];
-if (fs.existsSync('books.json')) {
-    books = JSON.parse(fs.readFileSync('books.json'));
-}
-
-// HALAMAN UTAMA PEMBELI
-app.get('/', (req, res) => {
-    res.render('index', { books: books });
+// --- 2. LOGIN ADMIN (Password: JESTRI0301209) ---
+app.get('/login', (req, res) => {
+    res.render('login');
 });
 
-// HALAMAN ADMIN RAHASIA (Mode Kelola Kamu)
-app.get('/kelola-jestri', (req, res) => {
-    res.render('admin', { books: books });
+app.post('/admin-dashboard', (req, res) => {
+    const { password } = req.body;
+    if (password === 'JESTRI0301209') {
+        req.session.isLoggedIn = true;
+        res.redirect('/jestri-control');
+    } else {
+        res.send("<script>alert('Password Salah!'); window.location='/login';</script>");
+    }
 });
 
-// FITUR TAMBAH BUKU
-app.post('/add-book', upload.single('img'), (req, res) => {
-    const { title, price, genre } = req.body;
-    const newBook = { title, price, genre, img: req.file.filename };
-    books.push(newBook);
-    fs.writeFileSync('books.json', JSON.stringify(books));
-    res.redirect('/kelola-jestri');
+// --- 3. DASHBOARD ADMIN (CRUD) ---
+app.get('/jestri-control', async (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect('/login');
+    try {
+        const listBuku = await Buku.find();
+        res.render('admin', { buku: listBuku });
+    } catch (err) {
+        res.send("Gagal memuat dashboard");
+    }
 });
 
-// FITUR HAPUS BUKU
-app.post('/delete-book/:id', (req, res) => {
-    books.splice(req.params.id, 1);
-    fs.writeFileSync('books.json', JSON.stringify(books));
-    res.redirect('/kelola-jestri');
+app.post('/tambah-buku', async (req, res) => {
+    if (!req.session.isLoggedIn) return res.sendStatus(403);
+    try {
+        const { judul, penulis, harga, gambar } = req.body;
+        await new Buku({ judul, penulis, harga, gambar }).save();
+        res.redirect('/jestri-control');
+    } catch (err) {
+        res.send("Gagal simpan buku");
+    }
 });
 
-app.listen(port, () => {
-    console.log(`E-BOOK JESTRI aktif di http://localhost:${port}`);
+app.get('/hapus-buku/:id', async (req, res) => {
+    if (!req.session.isLoggedIn) return res.redirect('/login');
+    try {
+        await Buku.findByIdAndDelete(req.params.id);
+        res.redirect('/jestri-control');
+    } catch (err) {
+        res.send("Gagal hapus");
+    }
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log('Server Ready'));
+
+module.exports = app;
 
