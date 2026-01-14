@@ -19,12 +19,14 @@
             <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
                 <span class="bg-blue-600 w-2 h-8 rounded-full"></span> Tambah Koleksi Baru
             </h2>
-            <form action="/tambah-buku" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" name="judul" placeholder="Judul Buku" class="bg-slate-900 border border-slate-700 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="text" name="penulis" placeholder="Nama Penulis" class="bg-slate-900 border border-slate-700 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="number" name="harga" placeholder="Harga Buku (Rp)" class="bg-slate-900 border border-slate-700 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                <input type="text" name="gambar" placeholder="Link URL Gambar Buku" class="bg-slate-900 border border-slate-700 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500" required>
-                <button type="submit" class="md:col-span-2 bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-bold shadow-lg shadow-blue-900/20 transition-all uppercase tracking-widest">Simpan ke Database</button>
+            <form action="/tambah-buku" method="POST">
+    <input type="text" name="judul" placeholder="Judul Buku" required>
+    <input type="text" name="penulis" placeholder="Penulis" required>
+    <input type="number" name="harga" placeholder="Harga (Contoh: 50000)" required>
+    <input type="text" name="gambar" placeholder="Link Gambar (URL)" required>
+    <button type="submit">Tambah Buku</button>
+</form>
+
             </form>
         </section>
 
