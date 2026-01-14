@@ -8,20 +8,23 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Menggunakan cookie-session agar stabil di Vercel
+// Kunci utama agar tidak Internal Server Error di Vercel
 app.use(cookieSession({
     name: 'session',
-    keys: ['jestri-secret-key-0301'],
-    maxAge: 24 * 60 * 60 * 1000 
+    keys: ['jestri-secret-0301'],
+    maxAge: 24 * 60 * 60 * 1000
 }));
 
-// TAMPILAN PEMBELI (Halaman Utama)
-app.get('/', (req, res) => { res.render('index'); });
+// --- 1. MODE PEMBELI ---
+app.get('/', (req, res) => {
+    res.render('index'); 
+});
 
-// HALAMAN LOGIN (Tampilan Keren)
-app.get('/login', (req, res) => { res.render('login'); });
+// --- 2. LOGIN ADMIN (PASSWORD ONLY: JESTRI0301209) ---
+app.get('/login', (req, res) => {
+    res.render('login');
+});
 
-// PROSES LOGIN (Hanya Password)
 app.post('/admin-dashboard', (req, res) => {
     const { password } = req.body;
     if (password === 'JESTRI0301209') {
@@ -32,13 +35,20 @@ app.post('/admin-dashboard', (req, res) => {
     }
 });
 
-// DASHBOARD ADMIN
+// --- 3. DASHBOARD ADMIN KEREN (/jestri-control) ---
 app.get('/jestri-control', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
-    res.render('admin', { buku: [] }); 
+    // Contoh data buku, lo bisa ganti dengan database nanti
+    const buku = []; 
+    res.render('admin', { buku });
+});
+
+app.get('/logout', (req, res) => {
+    req.session = null;
+    res.redirect('/');
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Ready'));
+app.listen(PORT, () => console.log('Server Ready'));
 module.exports = app;
 

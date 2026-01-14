@@ -1,44 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Admin - E-BOOK JESTRI</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
-        .box { background: white; padding: 20px; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        .logout { color: red; float: right; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin | Jestri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="box">
-        <a href="/logout" class="logout">Logout</a>
-        <h2>Dashboard Admin Jestri</h2>
-        <hr>
-        
-        <form action="/tambah-buku" method="POST">
-            <input type="text" name="judul" placeholder="Judul Buku" required>
-            <input type="number" name="harga" placeholder="Harga" required>
-            <button type="submit" style="background: green; color: white;">Tambah Buku</button>
-        </form>
+<body class="bg-slate-900 text-white font-sans">
+    <nav class="bg-slate-800 p-4 border-b border-slate-700">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tighter text-blue-400">JESTRI CONTROL</h1>
+            <a href="/logout" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg text-sm transition-all">Logout</a>
+        </div>
+    </nav>
 
-        <table>
-            <tr style="background: #eee;">
-                <th>Judul</th>
-                <th>Harga</th>
-                <th>Aksi</th>
-            </tr>
-            <% buku.forEach(item => { %>
-            <tr>
-                <td><%= item.judul %></td>
-                <td><%= item.harga %></td>
-                <td>
-                    <a href="/hapus-buku/<%= item.id %>" style="color: red;" onclick="return confirm('Yakin hapus?')">Hapus</a>
-                </td>
-            </tr>
-            <% }) %>
-        </table>
-    </div>
+    <main class="container mx-auto p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                <h3 class="text-slate-400 text-sm mb-1 uppercase tracking-wider font-semibold">Total Buku</h3>
+                <p class="text-3xl font-bold">0</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                <h3 class="text-slate-400 text-sm mb-1 uppercase tracking-wider font-semibold">Status Server</h3>
+                <p class="text-green-400 font-bold">ONLINE</p>
+            </div>
+        </div>
+
+        <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+            <div class="p-6 border-b border-slate-700 flex justify-between items-center">
+                <h2 class="text-lg font-bold">Daftar Buku</h2>
+                <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold">+ Tambah Buku</button>
+            </div>
+            <div class="p-10 text-center text-slate-500"> Belum ada buku yang diupload. </div>
+        </div>
+    </main>
 </body>
 </html>
 
