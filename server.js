@@ -29,23 +29,27 @@ const head = `
         .logo { font-weight: 800; font-size: 1.2rem; }
         .btn-donate { background: #000; color: #fff; padding: 8px 16px; border-radius: 50px; text-decoration: none; font-size: 0.8rem; font-weight: 600; }
 
-        /* SIDEBAR (Fix Sesuai Panah) */
         .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: #fff; z-index: 1001; transition: 0.4s; padding: 30px 20px; box-shadow: 10px 0 30px rgba(0,0,0,0.05); }
         .sidebar.active { left: 0; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 1000; display: none; backdrop-filter: blur(4px); }
         .overlay.active { display: block; }
 
-        .genre-item { display: block; padding: 15px; border-radius: 12px; text-decoration: none; color: #666; margin-bottom: 5px; font-weight: 500; }
-        .genre-item.active { background: #f0f0f0; color: #000; font-weight: 700; }
+        .sidebar h3 { font-size: 1.2rem; margin-bottom: 25px; font-weight: 800; }
+        .sidebar-label { font-size: 0.75rem; color: #999; font-weight: 700; letter-spacing: 1px; margin: 20px 0 10px 15px; text-transform: uppercase; }
+
+        .genre-item { display: block; padding: 12px 15px; border-radius: 12px; text-decoration: none; color: #555; margin-bottom: 2px; font-weight: 500; font-size: 0.95rem; }
+        .genre-item.active { background: #f4f4f4; color: #000; font-weight: 700; }
+        .genre-item:hover { background: #fafafa; }
 
         .container { max-width: 800px; margin: auto; padding: 20px; }
-        .search-box { width: 100%; padding: 15px 20px; border: 1px solid #eee; border-radius: 15px; background: #f9f9f9; outline: none; margin-bottom: 25px; }
+        .search-box { width: 100%; padding: 15px 20px; border: 1px solid #eee; border-radius: 15px; background: #f9f9f9; outline: none; margin-bottom: 25px; font-family: inherit; }
 
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .card { background: #fff; border-radius: 20px; overflow: hidden; }
+        .card { background: #fff; border-radius: 20px; text-decoration: none; color: inherit; }
         .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
         .card-info { padding: 10px 5px; }
-        .card-price { color: #2ecc71; font-weight: 700; }
+        .card-info h3 { font-size: 0.9rem; margin: 5px 0; font-weight: 700; line-height: 1.3; height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .card-price { color: #2ecc71; font-weight: 800; font-size: 1rem; }
     </style>
 </head>`;
 
@@ -56,17 +60,22 @@ app.get('/', async (req, res) => {
     if (genre && genre !== 'Semua') query.genre = genre;
 
     const data = await Buku.find(query).sort({_id:-1}).lean();
-    const genres = ['Semua', 'Fiksi', 'Edukasi', 'Teknologi', 'Bisnis'];
+    
+    // 8 Genre Populer Dunia
+    const genres = ['Fiksi', 'Edukasi', 'Teknologi', 'Bisnis', 'Self Dev', 'Misteri', 'Komik', 'Sejarah'];
 
-    const genreHtml = genres.map(g => `<a href="/?genre=${g}" class="genre-item ${genre === g || (!genre && g === 'Semua') ? 'active' : ''}">${g}</a>`).join('');
-    const cards = data.map(b => `<div class="card"><img src="${b.gambar}"><div class="card-info"><h3>${b.judul}</h3><div class="card-price">Rp ${b.harga.toLocaleString()}</div></div></div>`).join('');
+    const genreHtml = genres.map(g => `<a href="/?genre=${g}" class="genre-item ${genre === g ? 'active' : ''}">${g}</a>`).join('');
 
     res.send(`<!DOCTYPE html><html>${head}<body>
         <div class="overlay" id="overlay"></div>
         <div class="sidebar" id="sidebar">
-            <h3 style="margin-bottom:20px; padding-left:15px;">Kategori</h3>
+            <h3>Kategori</h3>
+            <a href="/" class="genre-item ${!genre || genre === 'Semua' ? 'active' : ''}">Semua</a>
+            
+            <div class="sidebar-label">GENRE</div>
             ${genreHtml}
         </div>
+
         <nav class="navbar">
             <div class="nav-left">
                 <button class="menu-btn" id="openMenu"><i class="fa-solid fa-bars-staggered"></i></button>
@@ -74,10 +83,21 @@ app.get('/', async (req, res) => {
             </div>
             <a href="#" class="btn-donate">Donate</a>
         </nav>
+
         <div class="container">
-            <form><input type="text" name="search" class="search-box" placeholder="Cari e-book..." value="${search||''}"></form>
-            <div class="grid">${cards}</div>
+            <form action="/"><input type="text" name="search" class="search-box" placeholder="Cari judul buku..." value="${search||''}"></form>
+            <div class="grid">
+                ${data.length > 0 ? data.map(b => `
+                    <div class="card" onclick="window.location.href='https://wa.me/628XXXXXXXX?text=Halo, saya ingin membeli buku: ${b.judul}'">
+                        <img src="${b.gambar}" onerror="this.src='https://via.placeholder.com/300x450?text=No+Cover'">
+                        <div class="card-info">
+                            <h3>${b.judul}</h3>
+                            <div class="card-price">Rp ${b.harga.toLocaleString('id-ID')}</div>
+                        </div>
+                    </div>`).join('') : '<p style="text-align:center; grid-column: 1/3; color: #999;">Belum ada buku di kategori ini.</p>'}
+            </div>
         </div>
+
         <script>
             const s=document.getElementById('sidebar'), o=document.getElementById('overlay');
             document.getElementById('openMenu').onclick=()=>{s.classList.add('active'); o.classList.add('active');};
@@ -86,13 +106,16 @@ app.get('/', async (req, res) => {
     </body></html>`);
 });
 
-// Route Admin Simple
-app.get('/login', (req, res) => { res.send('<form action="/login" method="POST"><input type="password" name="pw"><button>Login</button></form>'); });
+// Admin routes (Tetap sama agar tidak error)
+app.get('/login', (req, res) => { res.send('<body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif"><form action="/login" method="POST" style="padding:20px;border:1px solid #eee;border-radius:15px"><h2>Admin</h2><input type="password" name="pw" placeholder="Password"><button>Masuk</button></form></body>'); });
 app.post('/login', (req, res) => { if(req.body.pw==='JESTRI0301209'){req.session.admin=true;res.redirect('/admin');} });
 app.get('/admin', async (req, res) => {
     if(!req.session.admin) return res.redirect('/login');
-    const b = await Buku.find().lean();
-    res.send(`<h2>Admin</h2><form action="/add" method="POST"><input name="judul" placeholder="Judul"><input name="harga" type="number" placeholder="Harga"><input name="gambar" placeholder="URL Gambar"><button>Tambah</button></form><ul>${b.map(x=>`<li>${x.judul} <a href="/del/${x._id}">Hapus</a></li>`).join('')}</ul>`);
+    const b = await Buku.find().sort({_id:-1}).lean();
+    res.send(`<h2>Admin Panel</h2><form action="/add" method="POST" style="display:grid;gap:10px;max-width:300px">
+        <input name="judul" placeholder="Judul"><input name="harga" type="number" placeholder="Harga"><input name="gambar" placeholder="Link Gambar">
+        <select name="genre"><option>Fiksi</option><option>Edukasi</option><option>Teknologi</option><option>Bisnis</option><option>Self Dev</option><option>Misteri</option><option>Komik</option><option>Sejarah</option></select>
+        <button>Tambah</button></form><hr><ul>${b.map(x=>`<li>${x.judul} (${x.genre}) <a href="/del/${x._id}">Hapus</a></li>`).join('')}</ul>`);
 });
 app.post('/add', async (req, res) => { if(req.session.admin) await new Buku(req.body).save(); res.redirect('/admin'); });
 app.get('/del/:id', async (req, res) => { if(req.session.admin) await Buku.findByIdAndDelete(req.params.id); res.redirect('/admin'); });
