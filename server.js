@@ -13,36 +13,39 @@ const Buku = mongoose.model('Buku', { judul: String, penulis: String, harga: Num
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cookieSession({ name: 'session', keys: ['jestri-key'], maxAge: 24 * 60 * 60 * 1000 }));
 
-// RUTE PEMBELI (Halaman Utama)
 app.get('/', async (req, res) => {
     try {
-        const listBuku = await Buku.find();
-        res.render('index', { buku: listBuku });
-    } catch (e) { res.send("Error"); }
+        const data = await Buku.find();
+        res.render('index', { buku: data });
+    } catch (e) { res.send("Error Database"); }
 });
 
-// RUTE LOGIN & ADMIN
 app.get('/login', (req, res) => res.render('login'));
 app.post('/admin-dashboard', (req, res) => {
     if (req.body.password === 'JESTRI0301209') {
         req.session.admin = true;
         res.redirect('/jestri-control');
-    } else { res.send("Salah!"); }
+    } else { res.send("Password Salah!"); }
 });
 
 app.get('/jestri-control', async (req, res) => {
     if (!req.session.admin) return res.redirect('/login');
-    const listBuku = await Buku.find();
-    res.render('admin', { buku: listBuku });
+    const data = await Buku.find();
+    res.render('admin', { buku: data });
 });
 
 app.post('/tambah-buku', async (req, res) => {
     if (req.session.admin) {
-        const { judul, penulis, harga, gambar } = req.body;
-        await new Buku({ judul, penulis, harga: Number(harga), gambar }).save();
+        await new Buku({ 
+            judul: req.body.judul, 
+            penulis: req.body.penulis, 
+            harga: Number(req.body.harga), 
+            gambar: req.body.gambar 
+        }).save();
     }
     res.redirect('/jestri-control');
 });

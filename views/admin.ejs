@@ -2,45 +2,37 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control</title>
+    <title>Admin JESTRI</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .box { background: white; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; background: #2980b9; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .list { margin-top: 30px; border-collapse: collapse; width: 100%; }
-        .list th, .list td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        .list th { background: #2980b9; color: white; }
-        .del-btn { color: #e74c3c; text-decoration: none; font-weight: bold; }
+        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+        .form { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; border: 1px solid #ddd; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background: #f39c12; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        table { width: 100%; margin-top: 20px; background: white; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>🛠️ Panel Admin JESTRI</h2>
+    <div class="form">
+        <h2>Tambah Buku</h2>
         <form action="/tambah-buku" method="POST">
-            <input type="text" name="judul" placeholder="Judul Buku" required>
-            <input type="text" name="penulis" placeholder="Nama Penulis" required>
-            <input type="number" name="harga" placeholder="Harga (Angka saja: 50000)" required>
-            <input type="text" name="gambar" placeholder="Link Gambar (URL)" required>
-            <button type="submit">TAMBAH BUKU SEKARANG</button>
+            <input type="text" name="judul" placeholder="Judul" required>
+            <input type="text" name="penulis" placeholder="Penulis" required>
+            <input type="number" name="harga" placeholder="Harga (Angka Saja)" required>
+            <input type="text" name="gambar" placeholder="Link Gambar" required>
+            <button type="submit">SIMPAN</button>
         </form>
-        <hr>
-        <a href="/">Lihat Website</a> | <a href="/logout">Keluar</a>
     </div>
 
-    <table class="list">
-        <thead>
-            <tr><th>Judul</th><th>Harga</th><th>Aksi</th></tr>
-        </thead>
-        <tbody>
-            <% buku.forEach(item => { %>
-                <tr>
-                    <td><%= item.judul %></td>
-                    <td>Rp <%= Number(item.harga).toLocaleString('id-ID') %></td>
-                    <td><a href="/hapus-buku/<%= item._id %>" class="del-btn">Hapus</a></td>
-                </tr>
-            <% }) %>
-        </tbody>
+    <table>
+        <tr><th>Judul</th><th>Harga</th><th>Aksi</th></tr>
+        <% buku.forEach(b => { %>
+            <tr>
+                <td><%= b.judul %></td>
+                <td>Rp <%= b.harga %></td>
+                <td><a href="/hapus-buku/<%= b._id %>" style="color:red;">Hapus</a></td>
+            </tr>
+        <% }) %>
     </table>
 </body>
 </html>
