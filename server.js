@@ -3,31 +3,26 @@ const session = require('express-session');
 const path = require('path');
 const app = express();
 
-// Middleware agar form & json terbaca
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Konfigurasi Session (Kunci agar tidak Internal Server Error)
+// Konfigurasi Session agar Internal Server Error Hilang
 app.use(session({
-    secret: 'jestri-secret-key',
+    secret: 'jestri-ebook-key',
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false } 
 }));
 
-// ==========================================
-// 1. TAMPILAN PEMBELI (Sesuai Video Lo)
-// ==========================================
+// --- MODE PEMBELI (Tampilan di Video Lo) ---
 app.get('/', (req, res) => {
-    // Memanggil index.ejs agar menu genre & pencarian lo muncul
+    // Memanggil index.ejs agar menu genre muncul kembali
     res.render('index'); 
 });
 
-// ==========================================
-// 2. TAMPILAN ADMIN (Jestri Control)
-// ==========================================
+// --- MODE ADMIN ---
 app.get('/login', (req, res) => {
     res.render('login');
 });
@@ -47,18 +42,8 @@ app.get('/jestri-control', (req, res) => {
     res.render('admin', { buku: [] }); 
 });
 
-app.post('/tambah-buku', (req, res) => {
-    if (!req.session.isLoggedIn) return res.redirect('/login');
-    res.redirect('/jestri-control'); 
-});
-
-app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
-});
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Server Running...'));
+app.listen(PORT, () => console.log('Ready'));
 
 module.exports = app;
 
