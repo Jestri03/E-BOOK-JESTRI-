@@ -3,25 +3,27 @@ const session = require('express-session');
 const path = require('path');
 const app = express();
 
+// Konfigurasi Standar
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Fix Internal Server Error dengan konfigurasi session yang benar
 app.use(session({
-    secret: 'jestri-secret-key',
+    secret: 'jestri-ebook-secret',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 3600000 }
+    cookie: { secure: false } 
 }));
 
-// --- MODE PEMBELI (TETAP SEPERTI DI VIDEO) ---
+// --- MODE PEMBELI: SESUAI VIDEO LO ---
 app.get('/', (req, res) => {
-    // Memanggil index.ejs agar menu genre lo muncul lagi
+    // Memanggil index.ejs (Tampilan genre lo tetap aman)
     res.render('index'); 
 });
 
-// --- MODE ADMIN ---
+// --- MODE ADMIN: JESTRI CONTROL ---
 app.get('/login', (req, res) => {
     res.render('login');
 });
@@ -43,6 +45,7 @@ app.get('/jestri-control', (req, res) => {
 
 app.post('/tambah-buku', (req, res) => {
     if (!req.session.isLoggedIn) return res.redirect('/login');
+    // Logika simpan lo
     res.redirect('/jestri-control'); 
 });
 
