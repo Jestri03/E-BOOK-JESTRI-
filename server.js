@@ -8,21 +8,21 @@ app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Konfigurasi Session agar Internal Server Error Hilang
+// Fix Internal Server Error
 app.use(session({
-    secret: 'jestri-ebook-key',
+    secret: 'jestri-ebook-secret',
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false } 
 }));
 
-// --- MODE PEMBELI (Tampilan di Video Lo) ---
+// --- TAMPILAN PEMBELI (TETAP SESUAI VIDEO) ---
 app.get('/', (req, res) => {
-    // Memanggil index.ejs agar menu genre muncul kembali
+    // Memanggil index.ejs (Menu Genre lo aman di sini)
     res.render('index'); 
 });
 
-// --- MODE ADMIN ---
+// --- TAMPILAN ADMIN ---
 app.get('/login', (req, res) => {
     res.render('login');
 });
