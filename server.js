@@ -15,7 +15,7 @@ const LIST_GENRE = ['Fiksi','Edukasi','Teknologi','Bisnis','Pelajaran','Misteri'
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cookieSession({ name: 'jestri_final_fix', keys: ['JESTRI_ULTIMATE'], maxAge: 24 * 60 * 60 * 1000 }));
+app.use(cookieSession({ name: 'jestri_final_ultra', keys: ['JESTRI_SECRET'], maxAge: 24 * 60 * 60 * 1000 }));
 
 // --- API DATA ---
 app.get('/api/buku-json', async (req, res) => {
@@ -25,12 +25,13 @@ app.get('/api/buku-json', async (req, res) => {
     } catch (e) { res.status(500).json([]); }
 });
 
-// --- TAMPILAN PEMBELI ---
+// --- TAMPILAN PEMBELI (FIX WA FORMAT) ---
 app.get('/', async (req, res) => {
     res.send(`<!DOCTYPE html><html lang="id"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="referrer" content="no-referrer"> <title>E-BOOK JESTRI</title>
+    <meta name="referrer" content="no-referrer">
+    <title>E-BOOK JESTRI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
@@ -63,7 +64,7 @@ app.get('/', async (req, res) => {
         <span class="label-genre">(GENRE)</span>
         ${LIST_GENRE.map(g => `<button class="g-item" onclick="setG('${g}', this)">${g}</button>`).join('')}
     </div>
-    <div class="header"><i class="fa-solid fa-bars-staggered" onclick="tog()" style="cursor:pointer;"></i><b>E-BOOK JESTRI</b><a href="https://link.dana.id/qr/39bpg786" style="background:#2ed573; color:#fff; padding:8px 15px; border-radius:50px; text-decoration:none; font-size:0.7rem; font-weight:800;">DONATE</a></div>
+    <div class="header"><i class="fa-solid fa-bars-staggered" onclick="tog()"></i><b>E-BOOK JESTRI</b><a href="https://link.dana.id/qr/39bpg786" style="background:#2ed573; color:#fff; padding:8px 15px; border-radius:50px; text-decoration:none; font-size:0.7rem; font-weight:800;">DONATE</a></div>
     <div class="search-container"><input type="text" class="search-bar" id="sin" placeholder="Cari buku..." oninput="render()"></div>
     <div class="grid" id="gt"></div>
     <div class="social-float">
@@ -81,14 +82,19 @@ app.get('/', async (req, res) => {
             const grid = document.getElementById('gt');
             if(filtered.length === 0){ grid.innerHTML = \`<div style="grid-column:1/-1; text-align:center; padding:100px 20px; color:#ccc;">(\${curG.toLowerCase()} belum ada)</div>\`; return; }
             grid.innerHTML = filtered.map(b => {
-                // PROXY + OPTIMASI UKURAN (Agar ringan di HP orang lain)
                 const img = "https://wsrv.nl/?url=" + b.gambar.replace(/^https?:\\/\\//, '') + "&w=300&h=400&fit=cover&output=jpg&q=80";
+                
+                // FORMAT PESAN WA SESUAI PERMINTAAN
+                const hargaFormat = b.harga.toLocaleString('id-ID');
+                const waText = \`🛒 *ORDER E-BOOK JESTRI*\\n\\n📖 *JUDUL:* \${b.judul.toUpperCase()}\\n✍️ *PENULIS:* \${b.penulis.toUpperCase()}\\n💰 *HARGA:* Rp \${hargaFormat}\\n\\nSaya ingin membeli ebook ini. Mohon info cara pembayaran\`;
+                const waLink = "https://wa.me/6285189415489?text=" + encodeURIComponent(waText);
+
                 return \`<div class="card">
                     <div class="img-box"><img src="\${img}" loading="lazy" referrerpolicy="no-referrer"></div>
                     <div class="info">
                         <h3 style="font-size:0.8rem; height:2.4em; overflow:hidden; margin:0 0 5px 0;">\${b.judul}</h3>
-                        <div class="price">Rp \${b.harga.toLocaleString('id-ID')}</div>
-                        <button class="btn-buy" onclick="location.href='https://wa.me/6285189415489?text=Halo, saya mau beli buku: \${b.judul}'">BELI</button>
+                        <div class="price">Rp \${hargaFormat}</div>
+                        <button class="btn-buy" onclick="window.open('\${waLink}', '_blank')">BELI SEKARANG</button>
                     </div>
                 </div>\`;
             }).join('');
@@ -97,7 +103,7 @@ app.get('/', async (req, res) => {
     </script></body></html>`);
 });
 
-// --- LOGIN ADMIN ---
+// --- LOGIN ADMIN (LOCKED) ---
 app.get('/login', (req, res) => {
     res.send(`<!DOCTYPE html><html><head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -122,7 +128,7 @@ app.post('/login', (req, res) => {
     res.redirect('/admin');
 });
 
-// --- DASHBOARD ADMIN (FIX HARGA & ANTI ZOOM) ---
+// --- DASHBOARD ADMIN (FIX HARGA) ---
 app.get('/admin', async (req, res) => {
     if (!req.session.admin) return res.redirect('/login');
     const b = await Buku.find().sort({_id:-1}).lean();
@@ -139,27 +145,25 @@ app.get('/admin', async (req, res) => {
     </style></head><body>
         <div class="container">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3 style="margin:0;">Dashboard</h3><a href="/logout" style="color:red; text-decoration:none;">Logout</a>
+                <h3 style="margin:0;">Dashboard Admin</h3><a href="/logout" style="color:red; text-decoration:none; font-weight:700;">Logout</a>
             </div>
             <form id="fa">
                 <input id="j" placeholder="Judul Buku" required>
                 <input id="p" placeholder="Penulis" required>
-                <input id="h" type="text" placeholder="Harga (Contoh: 2.500 atau 2500)" required>
+                <input id="h" type="text" placeholder="Harga (Gunakan angka saja)" required>
                 <select id="g">${LIST_GENRE.map(g=>`<option>${g}</option>`).join('')}</select>
                 <input type="file" id="fi" required>
-                <button id="btn">TAMBAH BUKU</button>
+                <button id="btn">TAMBAH BUKU SEKARANG</button>
             </form>
             <div style="margin-top:25px;">
-                ${b.map(x => `<div class="list-item"><span>${x.judul}</span><a href="/del/${x._id}" style="color:red; text-decoration:none; font-weight:800;">Hapus</a></div>`).join('')}
+                <p style="font-weight:700; color:#64748b;">List E-Book:</p>
+                ${b.map(x => `<div class="list-item"><span>${x.judul}</span><a href="/del/${x._id}" style="color:red; text-decoration:none; font-weight:800; font-size:0.75rem;">Hapus</a></div>`).join('')}
             </div>
         </div>
         <script>
             document.getElementById('fa').onsubmit = async (e) => {
                 e.preventDefault(); const btn = document.getElementById('btn'); btn.disabled = true;
-                
-                // Bersihkan harga dari titik/karakter non-angka
                 const rawHarga = document.getElementById('h').value.replace(/[^0-9]/g, '');
-                
                 const fd = new FormData(); fd.append('image', document.getElementById('fi').files[0]);
                 try {
                     const iR = await fetch('https://api.imgbb.com/1/upload?key=63af1a12f6f91a1816c9d61d5268d948', {method:'POST', body:fd});
