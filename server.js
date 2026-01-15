@@ -15,7 +15,7 @@ const LIST_GENRE = ['Fiksi','Edukasi','Teknologi','Bisnis','Pelajaran','Misteri'
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cookieSession({ name: 'jestri_ultra_safe', keys: ['SECURE_99'], maxAge: 24 * 60 * 60 * 1000 }));
+app.use(cookieSession({ name: 'jestri_secure_v2', keys: ['JESTRI_KEY_99'], maxAge: 24 * 60 * 60 * 1000 }));
 
 // --- API DATA ---
 app.get('/api/buku-json', async (req, res) => {
@@ -34,7 +34,7 @@ app.get('/', async (req, res) => {
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background: #fff; overflow-x: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background: #fff; overflow-x: hidden; touch-action: pan-y; }
         .header { position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); z-index: 100; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0f0; }
         .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: #fff; z-index: 200; transition: 0.4s; padding: 40px 25px; box-shadow: 20px 0 60px rgba(0,0,0,0.1); }
         .sidebar.active { left: 0; }
@@ -81,13 +81,12 @@ app.get('/', async (req, res) => {
             if(filtered.length === 0){ grid.innerHTML = \`<div style="grid-column:1/-1; text-align:center; padding:50px; color:#999;">(\${curG.toLowerCase()} belum ada)</div>\`; return; }
             grid.innerHTML = filtered.map(b => {
                 const img = "https://wsrv.nl/?url=" + b.gambar.replace(/^https?:\\/\\//, '') + "&w=400&output=jpg";
-                const wa = encodeURIComponent("🛒 *ORDER E-BOOK JESTRI*\\n\\n📖 *JUDUL:* "+b.judul+"\\n💰 *HARGA:* Rp "+b.harga.toLocaleString('id-ID'));
                 return \`<div class="card">
                     <div class="img-box"><img src="\${img}" loading="lazy" referrerpolicy="no-referrer"></div>
                     <div class="info">
                         <h3 style="font-size:0.8rem; height:2.4em; overflow:hidden; margin:0 0 5px 0;">\${b.judul}</h3>
                         <div class="price">Rp \${b.harga.toLocaleString('id-ID')}</div>
-                        <button class="btn-buy" onclick="location.href='https://wa.me/6285189415489?text=\${wa}'">BELI</button>
+                        <button class="btn-buy" onclick="location.href='https://wa.me/6285189415489?text=Order \${b.judul}'">BELI</button>
                     </div>
                 </div>\`;
             }).join('');
@@ -96,12 +95,12 @@ app.get('/', async (req, res) => {
     </script></body></html>`);
 });
 
-// --- LOGIN ADMIN (CENTERED, FIXED, NO-SCROLL) ---
+// --- LOGIN ADMIN (LOCKED UI) ---
 app.get('/login', (req, res) => {
     res.send(`<!DOCTYPE html><html><head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body { margin:0; height:100vh; display:flex; align-items:center; justify-content:center; background:#0f172a; font-family:sans-serif; overflow:hidden; position:fixed; width:100%; }
+        body { margin:0; height:100vh; display:flex; align-items:center; justify-content:center; background:#0f172a; font-family:sans-serif; overflow:hidden; position:fixed; width:100%; touch-action:none; }
         .card { background:#fff; padding:35px; border-radius:25px; width:88%; max-width:320px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.3); }
         input { width:100%; padding:14px; border-radius:12px; border:1px solid #ddd; margin:20px 0; box-sizing:border-box; font-size:1rem; text-align:center; outline:none; }
         button { width:100%; padding:14px; border-radius:12px; border:none; background:#3b82f6; color:#fff; font-weight:800; cursor:pointer; }
@@ -121,30 +120,43 @@ app.post('/login', (req, res) => {
     res.redirect('/admin');
 });
 
-// --- DASHBOARD ADMIN (SIMETRIS) ---
+// --- DASHBOARD ADMIN (LOCKED & SYMMETRICAL) ---
 app.get('/admin', async (req, res) => {
     if (!req.session.admin) return res.redirect('/login');
     const b = await Buku.find().sort({_id:-1}).lean();
-    res.send(`<body style="font-family:sans-serif; background:#f1f5f9; padding:20px; margin:0;">
-        <div style="max-width:450px; margin:auto;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    res.send(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body { font-family:sans-serif; background:#f1f5f9; padding:0; margin:0; overflow-x:hidden; width:100%; touch-action: pan-y; }
+        .container { max-width:450px; margin:auto; padding:20px; box-sizing:border-box; }
+        .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        form { background:#fff; padding:20px; border-radius:20px; display:grid; gap:12px; box-shadow:0 4px 6px rgba(0,0,0,0.05); border:1px solid #e2e8f0; width:100%; box-sizing:border-box; }
+        input, select { width:100%; padding:12px; border-radius:10px; border:1px solid #ddd; outline:none; box-sizing:border-box; font-size:16px; /* Font size 16px cegah auto-zoom di iOS */ }
+        button { width:100%; padding:15px; background:#000; color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer; }
+        .list-item { background:#fff; padding:15px; border-radius:12px; margin-top:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #e2e8f0; }
+    </style></head><body>
+        <div class="container">
+            <div class="top-bar">
                 <h3 style="margin:0;">Dashboard</h3><a href="/logout" style="color:red; text-decoration:none; font-weight:700;">Logout</a>
             </div>
-            <form id="fa" style="background:#fff; padding:20px; border-radius:20px; display:grid; gap:12px; box-shadow:0 4px 6px rgba(0,0,0,0.05); border:1px solid #e2e8f0;">
-                <input id="j" placeholder="Judul Buku" required style="padding:12px; border-radius:10px; border:1px solid #ddd; outline:none;">
-                <input id="p" placeholder="Penulis" required style="padding:12px; border-radius:10px; border:1px solid #ddd; outline:none;">
-                <input id="h" type="number" placeholder="Harga" required style="padding:12px; border-radius:10px; border:1px solid #ddd; outline:none;">
-                <select id="g" style="padding:12px; border-radius:10px; border:1px solid #ddd; outline:none;">${LIST_GENRE.map(g=>`<option>${g}</option>`).join('')}</select>
-                <input type="file" id="fi" required style="font-size:0.8rem;">
-                <button id="btn" style="padding:15px; background:#000; color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer;">UPLOAD</button>
+            <form id="fa">
+                <input id="j" placeholder="Judul Buku" required>
+                <input id="p" placeholder="Penulis" required>
+                <input id="h" type="number" placeholder="Harga" required>
+                <select id="g">${LIST_GENRE.map(g=>`<option>${g}</option>`).join('')}</select>
+                <div style="font-size: 0.8rem; color:#666;">Pilih Foto Buku:</div>
+                <input type="file" id="fi" required style="border:none; padding:0;">
+                <button id="btn">UPLOAD BUKU</button>
             </form>
             <div style="margin-top:25px;">
-                ${b.map(x => `<div style="background:#fff; padding:15px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #e2e8f0;"><span style="font-size:0.9rem; font-weight:600;">${x.judul}</span><a href="/del/${x._id}" style="color:red; text-decoration:none; font-weight:800; font-size:0.75rem;">Hapus</a></div>`).join('')}
+                <p style="font-weight:700; color:#64748b;">Daftar Buku:</p>
+                ${b.map(x => `<div class="list-item"><span>${x.judul}</span><a href="/del/${x._id}" style="color:red; text-decoration:none; font-weight:800; font-size:0.75rem;">Hapus</a></div>`).join('')}
             </div>
         </div>
         <script>
             document.getElementById('fa').onsubmit = async (e) => {
-                e.preventDefault(); const btn = document.getElementById('btn'); btn.disabled = true; btn.innerText = 'Uploading...';
+                e.preventDefault(); const btn = document.getElementById('btn'); btn.disabled = true; btn.innerText = 'Tunggu...';
                 const fd = new FormData(); fd.append('image', document.getElementById('fi').files[0]);
                 try {
                     const iR = await fetch('https://api.imgbb.com/1/upload?key=63af1a12f6f91a1816c9d61d5268d948', {method:'POST', body:fd});
@@ -153,9 +165,9 @@ app.get('/admin', async (req, res) => {
                         judul: document.getElementById('j').value, penulis: document.getElementById('p').value, harga: Number(document.getElementById('h').value), genre: document.getElementById('g').value, gambar: iD.data.url 
                     }) });
                     location.reload();
-                } catch(e) { alert('Gagal!'); btn.disabled = false; btn.innerText = 'UPLOAD'; }
+                } catch(e) { alert('Gagal!'); btn.disabled = false; btn.innerText = 'UPLOAD BUKU'; }
             };
-        </script></body>`);
+        </script></body></html>`);
 });
 
 app.post('/add-ajax', async (req, res) => { if(req.session.admin) await new Buku(req.body).save(); res.sendStatus(200); });
