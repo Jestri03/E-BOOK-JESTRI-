@@ -12,185 +12,179 @@ const Buku = mongoose.model('Buku', {
 });
 
 const Order = mongoose.model('Order', { 
-    bukuId: String, judulBuku: String, bukti: String, status: { type: String, default: 'Pending' }, pdfLink: String 
+    items: Array, total: Number, bukti: String, status: { type: String, default: 'Pending' }
 });
 
 const LIST_GENRE = ['Fiksi','Edukasi','Teknologi','Bisnis','Pelajaran','Misteri','Komik','Sejarah'];
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cookieSession({ name: 'jestri_vFinal_Side', keys: ['JESTRI_MASTER_KEY_2026'], maxAge: 24 * 60 * 60 * 1000 }));
+app.use(cookieSession({ name: 'jestri_vCart', keys: ['JESTRI_ULTIMATE'], maxAge: 24 * 60 * 60 * 1000 }));
 
-// --- 1. TAMPILAN PEMBELI (SIDEBAR VERSION) ---
+// --- 1. TAMPILAN PEMBELI (SISTEM KERANJANG & PREMIUM DESIGN) ---
 app.get('/', (req, res) => {
     res.send(`<!DOCTYPE html><html lang="id"><head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JESTRI E-BOOK</title>
+    <title>JESTRI PREMIUM STORE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background: #fff; color: #1e293b; overflow-x: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background: #0f172a; color: #f8fafc; overflow-x: hidden; }
         
-        /* SIDEBAR LOGIC */
-        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #fff; z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 30px 20px; box-shadow: 10px 0 30px rgba(0,0,0,0.1); }
+        /* HEADER PREMIUM */
+        .header { position: sticky; top: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); z-index: 1000; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .cart-icon { position: relative; cursor: pointer; }
+        #cart-count { position: absolute; -10px; right: -10px; background: #ef4444; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 50%; font-weight: 800; }
+
+        /* SIDEBAR NAV */
+        .sidebar { position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #1e293b; z-index: 2000; transition: 0.4s; padding: 30px 20px; }
         .sidebar.active { left: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; display: none; backdrop-filter: blur(3px); }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1500; display: none; }
         .overlay.active { display: block; }
+        
+        .label-genre { font-size: 0.9rem; font-weight: 800; color: #38bdf8; margin: 25px 0 10px 0; display: block; text-transform: uppercase; border-left: 4px solid #38bdf8; padding-left: 10px; }
+        .nav-link { display: block; padding: 12px; color: #cbd5e1; text-decoration: none; font-weight: 600; border-radius: 10px; margin-bottom: 5px; }
+        .nav-link.active { background: #38bdf8; color: #0f172a; }
 
-        /* HEADER */
-        .header { position: sticky; top: 0; background: #fff; z-index: 1000; padding: 15px 20px; display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #f1f5f9; }
-        .header b { font-size: 1.2rem; }
+        /* DONATE BUTTON */
+        .btn-donate { display: block; margin-top: 30px; padding: 15px; background: #fbbf24; color: #000; text-align: center; border-radius: 15px; font-weight: 800; text-decoration: none; font-size: 0.8rem; }
 
-        /* MENU ITEMS */
-        .menu-title { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
-        .genre-link { display: block; padding: 12px 15px; border-radius: 12px; text-decoration: none; color: #475569; font-weight: 600; margin-bottom: 5px; transition: 0.2s; }
-        .genre-link.active { background: #0f172a; color: #fff; }
-
-        /* GRID CONTENT */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; max-width: 900px; margin: auto; }
-        .card { background: #fff; border-radius: 18px; overflow: hidden; border: 1px solid #f1f5f9; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        /* GRID BUKU */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .card { background: #1e293b; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
         .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
         .info { padding: 12px; }
-        .title { font-size: 0.8rem; font-weight: 700; height: 2.4em; overflow: hidden; margin-bottom: 5px; }
-        .price { color: #10b981; font-weight: 800; }
-        .btn-buy { width: 100%; margin-top: 10px; padding: 10px; border-radius: 12px; border: none; background: #0f172a; color: #fff; font-weight: 800; font-size: 0.75rem; }
+        .price { color: #22c55e; font-weight: 800; margin: 5px 0; }
+        .btn-add { width: 100%; padding: 10px; border-radius: 10px; border: none; background: #38bdf8; color: #0f172a; font-weight: 800; cursor: pointer; }
 
-        /* EMPTY MESSAGE */
-        .empty-state { grid-column: 1/-1; text-align: center; padding: 100px 20px; color: #94a3b8; }
-
-        /* FLOATING SOSMED */
-        .float-soc { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1100; }
-        .soc-btn { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.3rem; text-decoration: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-
-        /* MODAL */
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .m-box { background: #fff; width: 100%; max-width: 350px; border-radius: 25px; padding: 25px; text-align: center; }
+        /* MODAL KERANJANG */
+        #cart-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .cart-box { background: #1e293b; width: 100%; max-width: 400px; border-radius: 25px; padding: 25px; max-height: 80vh; overflow-y: auto; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
     </style></head><body>
 
-    <div class="overlay" id="ov" onclick="toggleSidebar()"></div>
-    
+    <div class="overlay" id="ov" onclick="tog()"></div>
     <div class="sidebar" id="sb">
-        <div class="menu-title">Kategori E-Book</div>
-        <a href="#" class="genre-link active" onclick="selectG('Semua', this)">Semua Koleksi</a>
-        ${LIST_GENRE.map(g => `<a href="#" class="genre-link" onclick="selectG('${g}', this)">${g}</a>`).join('')}
+        <a href="#" class="nav-link active" onclick="setG('Semua', this)">Semua Koleksi</a>
+        <span class="label-genre">Daftar Genre</span>
+        ${LIST_GENRE.map(g => `<a href="#" class="nav-link" onclick="setG('${g}', this)">${g}</a>`).join('')}
+        <a href="https://link.dana.id/qr/0895327806441" class="btn-donate"><i class="fa-solid fa-heart"></i> DONATE KE ADMIN</a>
     </div>
 
     <div class="header">
-        <i class="fa-solid fa-bars-staggered" onclick="toggleSidebar()" style="font-size:1.4rem; cursor:pointer;"></i>
-        <b id="headTitle">JESTRI STORE</b>
+        <i class="fa-solid fa-bars-staggered" onclick="tog()" style="font-size:1.4rem;"></i>
+        <b>JESTRI STORE</b>
+        <div class="cart-icon" onclick="openCart()">
+            <i class="fa-solid fa-shopping-basket" style="font-size:1.4rem;"></i>
+            <span id="cart-count">0</span>
+        </div>
     </div>
 
-    <div class="grid" id="mainGrid"></div>
+    <div id="mainGrid" class="grid"></div>
 
-    <div class="float-soc">
-        <a href="https://wa.me/6285189415489" class="soc-btn" style="background:#22c55e"><i class="fa-brands fa-whatsapp"></i></a>
-        <a href="https://www.instagram.com/jesssstri" class="soc-btn" style="background:linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)"><i class="fa-brands fa-instagram"></i></a>
-    </div>
-
-    <div id="modal">
-        <div class="m-box" id="mContent">
-            <h3 id="mJudul" style="margin:0"></h3>
-            <p id="mHarga" style="color:#10b981; font-weight:800; font-size:1.2rem; margin:10px 0"></p>
-            <div style="background:#f8fafc; padding:15px; border-radius:15px; text-align:left; border:1px dashed #cbd5e1;">
-                <p style="font-size:0.75rem; margin:0 0 10px 0;">Transfer DANA/OVO/GOPAY:<br><b>0895327806441</b></p>
-                <input type="file" id="fBukti" style="width:100%; font-size:0.75rem;">
+    <div id="cart-modal">
+        <div class="cart-box">
+            <h3>Keranjang Belanja</h3>
+            <div id="cart-list"></div>
+            <div style="margin-top:20px; border-top:2px solid #38bdf8; padding-top:15px;">
+                <div style="display:flex; justify-content:space-between; font-weight:800;">
+                    <span>TOTAL:</span><span id="cart-total">Rp 0</span>
+                </div>
+                <div id="pay-area" style="display:none; margin-top:20px;">
+                    <p style="font-size:0.7rem; color:#94a3b8;">Transfer ke DANA: <b>0895327806441</b></p>
+                    <input type="file" id="bukti-cart" style="font-size:0.8rem; margin-bottom:10px;">
+                    <button class="btn-add" onclick="checkout()">CHECKOUT SEKARANG</button>
+                </div>
+                <button id="btn-show-pay" class="btn-add" style="margin-top:15px; background:#22c55e;" onclick="showPay()">LANJUT PEMBAYARAN</button>
+                <button onclick="document.getElementById('cart-modal').style.display='none'" style="width:100%; margin-top:10px; background:none; border:none; color:#94a3b8;">Kembali</button>
             </div>
-            <button onclick="prosesBayar()" id="btnBayar" style="width:100%; padding:15px; background:#0f172a; color:#fff; border-radius:12px; border:none; margin-top:20px; font-weight:800;">KONFIRMASI BAYAR</button>
-            <button onclick="location.reload()" style="margin-top:10px; border:none; background:none; color:#94a3b8;">Batal</button>
         </div>
     </div>
 
     <script>
-        let dataBuku = []; let idTerpilih = '';
-        function toggleSidebar(){ document.getElementById('sb').classList.toggle('active'); document.getElementById('ov').classList.toggle('active'); }
-
-        async function fetchBuku(){ const r = await fetch('/api/buku-json'); dataBuku = await r.json(); render('Semua'); }
+        let books = []; let cart = [];
+        function tog(){ document.getElementById('sb').classList.toggle('active'); document.getElementById('ov').classList.toggle('active'); }
+        async function load(){ const r = await fetch('/api/buku-json'); books = await r.json(); render('Semua'); }
         
-        function selectG(g, el){
-            document.querySelectorAll('.genre-link').forEach(a => a.classList.remove('active'));
-            el.classList.add('active');
-            if(window.innerWidth < 1000) toggleSidebar();
-            render(g);
-        }
-
         function render(g){
+            const f = g === 'Semua' ? books : books.filter(b => b.genre === g);
             const grid = document.getElementById('mainGrid');
-            const filtered = g === 'Semua' ? dataBuku : dataBuku.filter(b => b.genre === g);
-            
-            if(filtered.length === 0){
-                grid.innerHTML = \`<div class="empty-state">
-                    <i class="fa-solid fa-book-open" style="font-size:3rem; opacity:0.2; margin-bottom:15px; display:block;"></i>
-                    <p style="font-weight:700;">Genre \${g} Belum Ada</p>
-                </div>\`;
-            } else {
-                grid.innerHTML = filtered.map(x => \`
-                    <div class="card">
-                        <img src="\${x.gambar}">
-                        <div class="info">
-                            <div class="title">\${x.judul}</div>
-                            <div class="price">Rp \${Number(x.harga).toLocaleString('id-ID')}</div>
-                            <button class="btn-buy" onclick="openBeli('\${x._id}','\${x.judul}','\${x.harga}')">BELI</button>
-                        </div>
+            if(f.length===0){ grid.innerHTML = \`<div style="grid-column:1/-1; text-align:center; padding:100px 20px;">Genre \${g} Belum Ada</div>\`; return; }
+            grid.innerHTML = f.map(x => \`
+                <div class="card">
+                    <img src="\${x.gambar}">
+                    <div class="info">
+                        <div style="font-size:0.75rem; font-weight:700; height:2.4em; overflow:hidden;">\${x.judul}</div>
+                        <div class="price">Rp \${Number(x.harga).toLocaleString('id-ID')}</div>
+                        <button class="btn-add" onclick="addToCart('\${x._id}')">TAMBAH +</button>
                     </div>
-                \`).join('');
+                </div>\`).join('');
+        }
+
+        function setG(g, el){ document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active')); el.classList.add('active'); if(window.innerWidth<1000) tog(); render(g); }
+
+        function addToCart(id){
+            const b = books.find(x => x._id === id);
+            if(cart.some(i => i._id === id)) return alert("Buku sudah ada di keranjang!");
+            cart.push(b);
+            document.getElementById('cart-count').innerText = cart.length;
+            alert("Berhasil ditambah ke keranjang!");
+        }
+
+        function openCart(){
+            const list = document.getElementById('cart-list');
+            if(cart.length === 0){ list.innerHTML = "<p>Keranjang kosong.</p>"; }
+            else {
+                list.innerHTML = cart.map((x, i) => \`<div class="cart-item">
+                    <span>\${x.judul}</span>
+                    <b>Rp \${Number(x.harga).toLocaleString('id-ID')}</b>
+                    <i class="fa-solid fa-trash" style="color:#ef4444" onclick="removeCart(\${i})"></i>
+                </div>\`).join('');
             }
+            let total = cart.reduce((a, b) => a + b.harga, 0);
+            document.getElementById('cart-total').innerText = 'Rp ' + total.toLocaleString('id-ID');
+            document.getElementById('cart-modal').style.display = 'flex';
         }
 
-        function openBeli(id, j, h){
-            idTerpilih = id;
-            document.getElementById('mJudul').innerText = j;
-            document.getElementById('mHarga').innerText = 'Rp ' + Number(h).toLocaleString('id-ID');
-            document.getElementById('modal').style.display = 'flex';
-        }
+        function removeCart(i){ cart.splice(i, 1); document.getElementById('cart-count').innerText = cart.length; openCart(); }
+        function showPay(){ if(cart.length===0) return; document.getElementById('pay-area').style.display='block'; document.getElementById('btn-show-pay').style.display='none'; }
 
-        async function prosesBayar(){
-            const file = document.getElementById('fBukti').files[0];
-            if(!file) return alert("Pilih foto bukti transfer!");
-            const btn = document.getElementById('btnBayar'); btn.innerText = "Processing..."; btn.disabled = true;
+        async function checkout(){
+            const f = document.getElementById('bukti-cart').files[0]; if(!f) return alert("Upload bukti!");
+            const btn = document.querySelector('#pay-area button'); btn.innerText = "Mengirim..."; btn.disabled = true;
             
-            const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', 'ml_default');
+            const fd = new FormData(); fd.append('file', f); fd.append('upload_preset', 'ml_default');
             const up = await fetch('https://api.cloudinary.com/v1_1/dxtp7vsqy/image/upload', {method:'POST', body:fd});
-            const iD = await up.json();
+            const img = await up.json();
 
-            const res = await fetch('/api/order', {
+            await fetch('/api/order-cart', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ bukuId: idTerpilih, bukti: iD.secure_url })
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ items: cart, total: cart.reduce((a,b)=>a+b.harga,0), bukti: img.secure_url })
             });
-            const ord = await res.json();
-
-            document.getElementById('mContent').innerHTML = \`<h3>Menunggu Admin</h3><p style="font-size:0.8rem; color:#64748b;">Validasi sedang berjalan. Link download akan muncul di bawah ini.</p><div id="statArea" style="margin-top:20px;"><i class="fas fa-circle-notch fa-spin fa-2x"></i></div>\`;
-
-            const cek = setInterval(async () => {
-                const rs = await fetch('/api/order-status/' + ord.id);
-                const s = await rs.json();
-                if(s.status === 'Approved'){
-                    clearInterval(cek);
-                    const linkFix = s.pdfLink.replace('/upload/', '/upload/fl_attachment/');
-                    document.getElementById('statArea').innerHTML = \`<a href="\${linkFix}" download style="display:block; background:#10b981; color:#fff; padding:15px; border-radius:12px; text-decoration:none; font-weight:800;">SIMPAN PDF <i class="fa-solid fa-download"></i></a>\`;
-                }
-            }, 3000);
+            alert("Pesanan terkirim! Admin akan memproses buku kamu.");
+            location.reload();
         }
-        fetchBuku();
+        load();
     </script></body></html>`);
 });
 
-// --- 2. LOGIN ADMIN (FIXED CENTER) ---
+// --- 2. LOGIN ADMIN (ANTI-GESER) ---
 app.get('/login', (req, res) => {
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
-        body { background:#0f172a; margin:0; height:100vh; display:flex; align-items:center; justify-content:center; font-family:sans-serif; overflow:hidden; }
-        .box { background:#1e293b; padding:40px; border-radius:30px; text-align:center; width:85%; max-width:320px; border:1px solid #334155; }
-        input { width:100%; padding:15px; margin:20px 0; border-radius:15px; border:1px solid #334155; background:#0f172a; color:#fff; text-align:center; box-sizing:border-box; font-size:18px; outline:none; }
-        button { width:100%; padding:15px; border-radius:15px; background:#38bdf8; border:none; font-weight:800; }
+        body { background:#0f172a; margin:0; height:100vh; display:flex; align-items:center; justify-content:center; }
+        .box { background:#1e293b; padding:40px; border-radius:30px; text-align:center; width:300px; border:1px solid #334155; }
+        input { width:100%; padding:15px; margin:20px 0; border-radius:12px; background:#0f172a; color:#fff; border:1px solid #334155; text-align:center; outline:none; }
+        button { width:100%; padding:15px; border-radius:12px; background:#38bdf8; border:none; font-weight:800; }
     </style></head><body><div class="box">
-        <h2 style="color:#fff; margin:0;">Admin Jestri</h2>
-        <form action="/login" method="POST"><input name="pw" type="password" required autofocus><button>MASUK</button></form>
+        <h2 style="color:#fff;">Admin Login</h2>
+        <form action="/login" method="POST"><input name="pw" type="password" required><button>MASUK</button></form>
     </div></body></html>`);
 });
 
-// --- 3. DASHBOARD ADMIN (LENGKAP) ---
+// --- 3. DASHBOARD ADMIN (WITH DELETE FUNCTION) ---
 app.get('/admin', async (req, res) => {
     if (!req.session.admin) return res.redirect('/login');
     const b = await Buku.find().sort({_id:-1});
@@ -199,84 +193,70 @@ app.get('/admin', async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: sans-serif; background: #0b0f19; color: #fff; padding: 15px; margin: 0; }
-        .container { max-width: 450px; margin: auto; }
-        .card { background: #161e2d; padding: 25px; border-radius: 20px; border: 1px solid #2d3748; margin-bottom: 20px; }
-        input, select { width: 100%; padding: 14px; margin: 8px 0 15px; border-radius: 12px; border: 1px solid #2d3748; background: #0b0f19; color: #fff; outline:none; }
-        .btn-up { width: 100%; padding: 16px; border-radius: 14px; background: #38bdf8; color: #000; font-weight: 800; border:none; cursor:pointer; }
-        .item { background: #161e2d; padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 5px solid #38bdf8; }
-        .btn-acc { background: #10b981; color:#fff; padding:8px 15px; border-radius:10px; text-decoration:none; font-size:0.75rem; font-weight:bold; }
-        .btn-rej { background: #ef4444; color:#fff; padding:8px 15px; border-radius:10px; text-decoration:none; font-size:0.75rem; font-weight:bold; margin-left:10px; }
+        body { background:#0b0f19; color:#fff; font-family:sans-serif; padding:15px; }
+        .card { background:#161e2d; padding:20px; border-radius:20px; border:1px solid #2d3748; margin-bottom:20px; }
+        input, select { width:100%; padding:12px; margin:10px 0; background:#0b0f19; color:#fff; border:1px solid #2d3748; border-radius:10px; }
+        .btn { width:100%; padding:15px; border-radius:12px; border:none; font-weight:800; cursor:pointer; background:#38bdf8; }
+        .list-item { background:#161e2d; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #2d3748; }
     </style></head><body>
-    <div class="container">
-        <h2 style="text-align:center; color:#38bdf8;">JESTRI ADMIN</h2>
+    <div style="max-width:500px; margin:auto;">
+        <h2>ADMIN JESTRI</h2>
         <div class="card">
-            <label>1. JUDUL BUKU</label><input id="j">
-            <label>2. PENULIS</label><input id="p">
-            <label>3. HARGA</label><input id="h" placeholder="5000">
-            <label>4. GAMBAR (GALERI)</label><input type="file" id="fi">
-            <label>5. PDF (FILE HP)</label><input type="file" id="fp">
-            <label>GENRE</label><select id="g">${LIST_GENRE.map(gx=>`<option>${gx}</option>`).join('')}</select>
-            <button class="btn-up" onclick="up()">UPLOAD BUKU</button>
+            <h3>Tambah Buku Baru</h3>
+            <input id="j" placeholder="Judul">
+            <input id="p" placeholder="Penulis">
+            <input id="h" placeholder="Harga">
+            <label>Gambar:</label><input type="file" id="fi">
+            <label>PDF:</label><input type="file" id="fp">
+            <select id="g">${LIST_GENRE.map(gx=>`<option>${gx}</option>`).join('')}</select>
+            <button class="btn" onclick="up()">SIMPAN BUKU</button>
         </div>
-        <h3>Konfirmasi Pembayaran (${o.length})</h3>
-        ${o.map(x => `<div class="item">
-            <b>${x.judulBuku}</b><br><br>
-            <a href="/admin/approve/${x._id}" class="btn-acc">SETUJUI</a>
-            <a href="/admin/reject/${x._id}" class="btn-rej">TOLAK</a>
-            <a href="${x.bukti}" target="_blank" style="color:#38bdf8; float:right; font-size:0.7rem;">Cek Bukti</a>
-        </div>`).join('')}
-        <h3 style="color:#ef4444; margin-top:30px;">Katalog Buku</h3>
-        ${b.map(x => `<div class="item" style="display:flex; justify-content:space-between;">
+
+        <h3>Daftar Buku (Hapus Disini)</h3>
+        ${b.map(x => `<div class="list-item">
             <span>${x.judul}</span>
-            <a href="/admin/del/${x._id}" style="color:#ef4444;"><i class="fa-solid fa-trash"></i></a>
+            <a href="/admin/del/${x._id}" style="color:#ef4444;" onclick="return confirm('Hapus buku ini?')"><i class="fa-solid fa-trash"></i></a>
+        </div>`).join('')}
+
+        <h3>Orderan Masuk (${o.length})</h3>
+        ${o.map(x => `<div class="card">
+            <b>Total: Rp ${x.total.toLocaleString('id-ID')}</b><br>
+            <small>${x.items.map(i=>i.judul).join(', ')}</small><br>
+            <a href="${x.bukti}" target="_blank" style="color:#38bdf8;">Lihat Bukti</a><br>
+            <a href="/admin/approve-cart/${x._id}" style="color:#22c55e;">Selesaikan & Kirim PDF</a>
         </div>`).join('')}
     </div>
     <script>
         async function up(){
             const fi = document.getElementById('fi').files[0]; const fp = document.getElementById('fp').files[0];
-            if(!fi || !fp) return alert("File belum lengkap!");
-            const btn = document.querySelector('.btn-up'); btn.innerText = "Mengunggah..."; btn.disabled = true;
-            
+            const btn = document.querySelector('.btn'); btn.innerText = "Processing..."; btn.disabled = true;
             const fdI = new FormData(); fdI.append('file', fi); fdI.append('upload_preset', 'ml_default');
             const rI = await fetch('https://api.cloudinary.com/v1_1/dxtp7vsqy/image/upload', {method:'POST', body:fdI});
             const dI = await rI.json();
-
             const fdP = new FormData(); fdP.append('file', fp); fdP.append('upload_preset', 'ml_default');
             const rP = await fetch('https://api.cloudinary.com/v1_1/dxtp7vsqy/raw/upload', {method:'POST', body:fdP});
             const dP = await rP.json();
-
             await fetch('/admin/save-buku', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({judul:document.getElementById('j').value, penulis:document.getElementById('p').value, harga:document.getElementById('h').value, genre:document.getElementById('g').value, gambar:dI.secure_url, pdfUrl:dP.secure_url}) });
             location.reload();
         }
     </script></body></html>`);
 });
 
-// --- 4. BACKEND API ---
+// --- 4. BACKEND LOGIC ---
 app.post('/login', (req, res) => { if (req.body.pw === 'JESTRI0301209') req.session.admin = true; res.redirect('/admin'); });
 app.post('/admin/save-buku', async (req, res) => {
-    if(!req.session.admin) return res.status(403).send("No");
-    await new Buku({ ...req.body, harga: Number(req.body.harga) }).save();
+    if(req.session.admin) await new Buku({ ...req.body, harga: Number(req.body.harga) }).save();
     res.json({ success: true });
 });
-app.get('/admin/approve/:id', async (req, res) => {
-    const o = await Order.findById(req.params.id); const b = await Buku.findById(o.bukuId);
-    await Order.findByIdAndUpdate(req.params.id, { status: 'Approved', pdfLink: b.pdfUrl });
+app.get('/admin/del/:id', async (req, res) => {
+    if(req.session.admin) await Buku.findByIdAndDelete(req.params.id);
     res.redirect('/admin');
 });
-app.get('/admin/reject/:id', async (req, res) => {
-    if(req.session.admin) await Order.findByIdAndDelete(req.params.id);
-    res.redirect('/admin');
+app.post('/api/order-cart', async (req, res) => {
+    const o = new Order({ items: req.body.items, total: req.body.total, bukti: req.body.bukti });
+    await o.save(); res.json({ success: true });
 });
-app.get('/admin/del/:id', async (req, res) => { if(req.session.admin) await Buku.findByIdAndDelete(req.params.id); res.redirect('/admin'); });
 app.get('/api/buku-json', async (req, res) => { res.json(await Buku.find().sort({_id:-1})); });
-app.post('/api/order', async (req, res) => {
-    const b = await Buku.findById(req.body.bukuId);
-    const o = new Order({ bukuId: req.body.bukuId, judulBuku: b.judul, bukti: req.body.bukti });
-    await o.save(); res.json({ id: o._id });
-});
-app.get('/api/order-status/:id', async (req, res) => { res.json(await Order.findById(req.params.id)); });
 
 app.listen(process.env.PORT || 3000);
 
