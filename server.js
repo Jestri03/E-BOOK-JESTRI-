@@ -5,7 +5,7 @@ const app = express();
 
 // --- DATABASE ---
 const MONGO_URI = 'mongodb+srv://JESTRI:JESTRI0301209@cluster0.tprp2r7.mongodb.net/ebook_jestri?retryWrites=true&w=majority';
-mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 15000 }).catch(err => console.log(err));
+mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 15000 }).catch(err => console.log("DB Offline"));
 
 const Buku = mongoose.model('Buku', { 
     judul: String, penulis: String, harga: Number, gambar: String, genre: String 
@@ -14,25 +14,22 @@ const Buku = mongoose.model('Buku', {
 const LIST_GENRE = ['Fiksi','Edukasi','Teknologi','Bisnis','Pelajaran','Misteri','Komik','Sejarah'];
 
 // --- MIDDLEWARE ---
-app.set('trust proxy', 1);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieSession({
-    name: 'jestri_vfinal_session',
-    keys: ['CORE_JESTRI_FINAL_FIX'],
-    maxAge: 24 * 60 * 60 * 1000,
-    secure: true,
-    sameSite: 'none'
+    name: 'jestri_final_secure',
+    keys: ['SECRET_99_JESTRI'],
+    maxAge: 24 * 60 * 60 * 1000
 }));
 
-// --- API DATA (SMART RESPONSE & IMAGE FIX) ---
+// --- API KATALOG (OPTIMIZED) ---
 app.get('/api/buku', async (req, res) => {
     try {
         let { genre, search } = req.query;
         let query = {};
         if (search) query.judul = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' };
         if (genre && genre !== 'Semua') query.genre = genre;
-        const data = await Buku.find(query).sort({_id:-1}).limit(50).lean();
+        const data = await Buku.find(query).sort({_id:-1}).lean();
         
         if (!data.length) {
             const label = (genre && genre !== 'Semua') ? `Buku ${genre} belum ada` : 'Buku tidak ditemukan';
@@ -40,16 +37,14 @@ app.get('/api/buku', async (req, res) => {
         }
 
         res.send(data.map(b => {
-            // Konversi link ImgBB ke Direct Link jika memungkinkan
-            let finalImg = b.gambar.replace('ibb.co', 'i.ibb.co'); 
-            if (!finalImg.match(/\.(jpeg|jpg|gif|png)$/)) finalImg += '.jpg';
-
             const waMsg = encodeURIComponent(`🛒 *ORDER E-BOOK JESTRI*\n\n📖 *JUDUL:* ${b.judul}\n✍️ *PENULIS:* ${b.penulis}\n💰 *HARGA:* Rp ${b.harga.toLocaleString('id-ID')}\n\nSaya ingin membeli ebook ini. Mohon info cara pembayaran`);
-            
             return `
             <div class="card-p animate-in">
                 <div class="img-p">
-                    <img src="${finalImg}" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/400x600?text=Foto+Buku'">
+                    <img src="${b.gambar}" 
+                         alt="${b.judul}" 
+                         onerror="this.onerror=null; this.src='https://placehold.co/400x600?text=E-Book+Jestri'"
+                         loading="lazy">
                 </div>
                 <div class="info-p">
                     <span class="tag-p">${b.genre}</span>
@@ -62,34 +57,32 @@ app.get('/api/buku', async (req, res) => {
     } catch (e) { res.sendStatus(500); }
 });
 
-// --- HALAMAN PEMBELI ---
+// --- HALAMAN UTAMA ---
 app.get('/', async (req, res) => {
     const initial = await Buku.find().sort({_id:-1}).limit(12).lean();
     res.send(`<!DOCTYPE html><html lang="id"><head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="referrer" content="no-referrer">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>E-BOOK JESTRI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background: #fff; color: #111; overflow-x: hidden; }
-        .nav { position: sticky; top: 0; background: rgba(255,255,255,0.85); backdrop-filter:blur(20px); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .nav { position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter:blur(15px); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; border-bottom: 1px solid #f1f1f1; }
         .nav b { font-size: 1.2rem; font-weight: 800; letter-spacing: -1px; }
-        .sidebar { position: fixed; top: 0; left: -110%; width: 280px; height: 100%; background: #fff; z-index: 200; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); padding: 30px 20px; box-shadow: 20px 0 50px rgba(0,0,0,0.1); }
+        .sidebar { position: fixed; top: 0; left: -110%; width: 280px; height: 100%; background: #fff; z-index: 200; transition: 0.4s; padding: 30px 20px; box-shadow: 20px 0 50px rgba(0,0,0,0.1); }
         .sidebar.active { left: 0; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 150; display: none; backdrop-filter: blur(4px); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 150; display: none; }
         .overlay.active { display: block; }
-        .g-item { display: block; width: 100%; padding: 15px; margin-bottom: 8px; border-radius: 15px; border: none; background: #f8f8f8; text-align: left; font-weight: 700; color: #555; cursor: pointer; transition: 0.2s; font-family: inherit; }
+        .g-item { display: block; width: 100%; padding: 15px; margin-bottom: 8px; border-radius: 15px; border: none; background: #f8f8f8; text-align: left; font-weight: 700; color: #555; cursor: pointer; transition: 0.2s; }
         .g-item.active { background: #000; color: #fff; }
         .container { max-width: 800px; margin: auto; padding: 15px; }
         .search-in { width: 100%; padding: 18px; border-radius: 20px; border: 1px solid #eee; background: #f9f9f9; margin-bottom: 25px; font-size: 1rem; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; transition: 0.3s; }
         .card-p { background: #fff; border-radius: 20px; overflow: hidden; border: 1px solid #f2f2f2; }
-        .animate-in { animation: fadeIn 0.5s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .img-p { width: 100%; aspect-ratio: 2/3; background: #eee; }
-        .img-p img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .img-p { width: 100%; aspect-ratio: 2/3; background: #f5f5f5; }
+        .img-p img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: 0.5s; }
+        .img-p img[src] { opacity: 1; }
         .info-p { padding: 15px; }
         .tag-p { font-size: 0.65rem; font-weight: 800; color: #3498db; text-transform: uppercase; margin-bottom: 5px; display: block; }
         .info-p h3 { font-size: 0.9rem; margin: 5px 0; font-weight: 800; height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.3; }
@@ -104,14 +97,14 @@ app.get('/', async (req, res) => {
         <button class="g-item active" onclick="load('Semua', this)">Semua Koleksi</button>
         ${LIST_GENRE.map(g => `<button class="g-item" onclick="load('${g}', this)">${g}</button>`).join('')}
     </div>
-    <div class="nav"><i class="fa-solid fa-bars-staggered" onclick="tog()" style="cursor:pointer;"></i><b>E-BOOK JESTRI</b><a href="https://link.dana.id/qr/39bpg786" style="background:#2ed573; color:#fff; padding:10px 18px; border-radius:50px; text-decoration:none; font-size:0.7rem; font-weight:800;">DONATE</a></div>
+    <div class="nav"><i class="fa-solid fa-bars-staggered" onclick="tog()" style="cursor:pointer;"></i><b>E-BOOK JESTRI</b><a href="https://link.dana.id/qr/39bpg786" style="background:#2ed573; color:#fff; padding:10px 18px; border-radius:50px; text-decoration:none; font-size:0.75rem; font-weight:800;">DONATE</a></div>
     <div class="container">
-        <input type="text" class="search-in" oninput="cari(this.value)" placeholder="Cari judul atau penulis...">
+        <input type="text" class="search-in" oninput="cari(this.value)" placeholder="Cari buku...">
         <div class="grid" id="gt">
             ${initial.map(b => {
                 const waMsg = encodeURIComponent(`🛒 *ORDER E-BOOK JESTRI*\n\n📖 *JUDUL:* ${b.judul}\n✍️ *PENULIS:* ${b.penulis}\n💰 *HARGA:* Rp ${b.harga.toLocaleString('id-ID')}\n\nSaya ingin membeli ebook ini. Mohon info cara pembayaran`);
                 return `<div class="card-p">
-                    <div class="img-p"><img src="${b.gambar.replace('ibb.co', 'i.ibb.co')}" referrerpolicy="no-referrer"></div>
+                    <div class="img-p"><img src="${b.gambar}" onload="this.style.opacity=1" onerror="this.src='https://placehold.co/400x600?text=Foto+Buku'"></div>
                     <div class="info-p">
                         <span class="tag-p">${b.genre}</span>
                         <h3>${b.judul}</h3>
@@ -133,13 +126,13 @@ app.get('/', async (req, res) => {
             const grid = document.getElementById('gt');
             document.querySelectorAll('.g-item').forEach(b => b.classList.remove('active'));
             el.classList.add('active'); if(window.innerWidth < 768) tog();
-            grid.style.opacity = '0.4';
+            grid.style.opacity = '0.3';
             const res = await fetch('/api/buku?genre='+encodeURIComponent(g));
             grid.innerHTML = await res.text();
             grid.style.opacity = '1';
         }
         let t; function cari(v){ clearTimeout(t); t = setTimeout(async () => {
-            const grid = document.getElementById('gt'); grid.style.opacity = '0.4';
+            const grid = document.getElementById('gt'); grid.style.opacity = '0.3';
             const res = await fetch('/api/buku?search='+encodeURIComponent(v));
             grid.innerHTML = await res.text(); grid.style.opacity = '1';
         }, 300); }
@@ -161,7 +154,7 @@ app.get('/admin', async (req, res) => {
     const b = await Buku.find().sort({_id:-1}).lean();
     res.send(`<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>body{font-family:sans-serif;background:#f4f6f8;margin:0;padding:20px;}.card{background:#fff;padding:25px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.05);max-width:500px;margin:auto;}input, select{width:100%;padding:14px;margin-bottom:12px;border-radius:12px;border:1px solid #ddd;font-size:1rem;box-sizing:border-box;}button{width:100%;padding:16px;background:#000;color:#fff;border:none;border-radius:12px;font-weight:bold;cursor:pointer;}.item{background:#fff;padding:15px;border-radius:15px;margin:10px auto;display:flex;justify-content:space-between;align-items:center;max-width:500px;border:1px solid #eee;}</style></head><body>
     <div style="max-width:500px;margin:auto;">
-        <div style="display:flex;justify-content:space-between;align-items:center;"><h3>Admin Panel</h3><a href="/logout" style="color:red;text-decoration:none;font-weight:bold;">Logout</a></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><h3>Panel Admin</h3><a href="/logout" style="color:red;text-decoration:none;font-weight:bold;">Logout</a></div>
         <div class="card">
             <form id="fa">
                 <input id="j" placeholder="Judul Buku" required>
@@ -184,10 +177,8 @@ app.get('/admin', async (req, res) => {
             try {
                 const iR = await fetch('https://api.imgbb.com/1/upload?key=63af1a12f6f91a1816c9d61d5268d948', {method:'POST', body:fd});
                 const iD = await iR.json();
-                // PAKSA AMBIL DIRECT LINK .JPG
-                let finalUrl = iD.data.url;
                 await fetch('/add-ajax', { method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ 
-                    judul: document.getElementById('j').value, penulis: document.getElementById('p').value, harga: Number(price), genre: document.getElementById('g').value, gambar: finalUrl 
+                    judul: document.getElementById('j').value, penulis: document.getElementById('p').value, harga: Number(price), genre: document.getElementById('g').value, gambar: iD.data.url 
                 }) });
                 location.reload();
             } catch(e) { alert('Upload Gagal!'); btn.disabled = false; btn.innerText = 'POSTING BUKU'; }
@@ -200,5 +191,5 @@ app.get('/del/:id', async (req, res) => { if(req.session.admin) { await Buku.fin
 app.get('/logout', (req, res) => { req.session = null; res.redirect('/'); });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("System Perfected"));
+app.listen(PORT, () => console.log("Stable Ready"));
 
