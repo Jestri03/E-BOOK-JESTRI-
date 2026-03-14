@@ -3,248 +3,233 @@ const mongoose = require('mongoose');
 const cookieSession = require('cookie-session');
 const app = express();
 
-// --- KONEKSI DATABASE ---
+// --- DATABASE & SCHEMA ---
 const MONGO_URI = 'mongodb+srv://JESTRI:JESTRI0301209@cluster0.tprp2r7.mongodb.net/ebook_jestri?retryWrites=true&w=majority';
-mongoose.connect(MONGO_URI).then(() => console.log("✅ DB Connected")).catch(e => console.error(e));
+mongoose.connect(MONGO_URI).then(() => console.log("💎 Secure Connection Established")).catch(e => console.error(e));
 
-// SCHEMA
-const Buku = mongoose.model('Buku', { judul: String, penulis: String, harga: Number, gambar: String, genre: String });
-const Order = mongoose.model('Order', { items: Array, total: Number, bukti: String, status: { type: String, default: 'Pending' }, downloadLink: String });
+const Buku = mongoose.model('Buku', { 
+    judul: String, penulis: String, investasi: Number, gambar: String, genre: String, status: String 
+});
+const Order = mongoose.model('Order', { 
+    items: Array, total: Number, bukti: String, status: { type: String, default: 'Pending' }, downloadLink: String, createdAt: { type: Date, default: Date.now } 
+});
 
 const LIST_GENRE = ['Bisnis', 'Teknologi', 'Fiksi', 'Edukasi', 'Misteri', 'Komik', 'Sejarah'];
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(cookieSession({ name: 'jestri_v7', keys: ['JESTRI_MASTER_KEY'], maxAge: 24 * 60 * 60 * 1000 }));
+app.use(cookieSession({ name: 'jestri_vip_2026', keys: ['ELITE_ACCESS'], maxAge: 24 * 60 * 60 * 1000 }));
 
-// --- 1. TAMPILAN PEMBELI (E-BOOK JESTRI) ---
+// --- 1. FRONTEND: E-BOOK JESTRI (ESTETIKA RICH BLACK) ---
 app.get('/', (req, res) => {
     res.send(`<!DOCTYPE html><html lang="id"><head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-BOOK JESTRI</title>
+    <title>E-BOOK JESTRI | Digital Literacy, Redefined</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;800&display=swap');
-        body { font-family: 'Poppins', sans-serif; background: #F1F5F9; color: #0F172A; }
-        .sidebar { transition: 0.3s transform ease-in-out; }
-        .glass-header { background: rgba(11, 77, 116, 0.98); backdrop-filter: blur(10px); }
-        .book-card { background: white; border-radius: 1.5rem; overflow: hidden; border: 1px solid #E2E8F0; }
-    </style></head><body class="pb-20">
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        :root { --rich-black: #0A0A0A; --elegant-blue: #007AFF; --card-bg: #161618; }
+        body { font-family: 'Inter', sans-serif; background: var(--rich-black); color: #ffffff; scroll-smooth: always; }
+        .glass { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .book-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.03); transition: all 0.4s ease; border-radius: 20px; overflow: hidden; }
+        .book-card:hover { transform: translateY(-10px); border-color: var(--elegant-blue); box-shadow: 0 20px 40px rgba(0,122,255,0.1); }
+        .sidebar { transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); background: #0F0F11; border-right: 1px solid rgba(255,255,255,0.05); }
+        .btn-vip { background: var(--elegant-blue); transition: 0.3s; box-shadow: 0 10px 20px rgba(0,122,255,0.3); }
+        .btn-vip:hover { transform: scale(1.05); box-shadow: 0 15px 30px rgba(0,122,255,0.5); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+    </style></head><body>
 
-    <header class="glass-header sticky top-0 z-50 p-4 px-6 flex justify-between items-center text-white shadow-xl">
-        <div class="flex items-center gap-4">
-            <button onclick="togSidebar()" class="text-xl p-2"><i class="fa-solid fa-bars-staggered"></i></button>
-            <h1 class="font-black text-xl tracking-tight">E-BOOK <span class="text-amber-400">JESTRI</span></h1>
+    <nav class="glass sticky top-0 z-[100] px-6 py-5">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-6">
+                <i class="fa-solid fa-bars-staggered text-xl cursor-pointer hover:text-blue-500 transition" onclick="togSide()"></i>
+                <h1 class="text-xl font-extrabold tracking-tighter">E-BOOK <span class="text-blue-500">JESTRI</span></h1>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="hidden md:flex gap-8 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">
+                    <a href="#" class="hover:text-white transition">Eksplorasi</a>
+                    <a href="#" class="hover:text-white transition">Koleksi</a>
+                    <a href="#" class="hover:text-white transition">Tentang</a>
+                </div>
+                <button onclick="togCart()" class="bg-white/5 p-3 px-5 rounded-full border border-white/10 hover:bg-white/10 transition">
+                    <i class="fa-solid fa-bag-shopping text-blue-500"></i> <span id="cartCount" class="ml-2 font-bold text-xs">0</span>
+                </button>
+            </div>
         </div>
-        <div class="bg-white/10 p-2 px-4 rounded-full cursor-pointer hover:bg-white/20" onclick="togCart()">
-            <i class="fa-solid fa-cart-shopping text-amber-400"></i> <span id="cartCount" class="font-bold ml-1">0</span>
+    </nav>
+
+    <div id="ov" onclick="togSide()" class="fixed inset-0 bg-black/80 z-[110] hidden backdrop-blur-sm"></div>
+    <aside id="sb" class="sidebar fixed top-0 left-0 h-full w-80 z-[120] -translate-x-full p-10">
+        <div class="flex justify-between items-center mb-12">
+            <span class="text-xs font-black tracking-[0.3em] text-gray-500">KATEGORI VIP</span>
+            <i class="fa-solid fa-xmark cursor-pointer text-gray-500" onclick="togSide()"></i>
+        </div>
+        <div class="space-y-4">
+            <button onclick="filterG('Semua')" class="w-full text-left p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-blue-500 transition text-sm font-bold">Semua Koleksi</button>
+            ${LIST_GENRE.map(g => `<button onclick="filterG('${g}')" class="w-full text-left p-4 rounded-2xl border border-transparent hover:bg-white/5 hover:border-white/10 transition text-sm text-gray-400 hover:text-white">${g}</button>`).join('')}
+        </div>
+    </aside>
+
+    <header class="py-24 px-6 text-center max-w-5xl mx-auto">
+        <span class="text-[10px] font-black tracking-[0.5em] text-blue-500 uppercase mb-6 block">Digital Literacy, Redefined</span>
+        <h2 class="text-5xl md:text-7xl font-extrabold leading-tight mb-8">Definisi Baru <br> Literasi Digital <span class="text-gray-500 italic">Masa Kini.</span></h2>
+        <p class="text-gray-400 text-lg md:text-xl leading-relaxed mb-12 max-w-3xl mx-auto font-light">E-BOOK JESTRI memadukan teknologi web modern dengan estetika tinggi untuk menghadirkan ekosistem literatur digital premium.</p>
+        <div class="flex justify-center gap-12 text-center border-y border-white/5 py-8 mb-12">
+            <div><p class="text-2xl font-black">500+</p><p class="text-[10px] text-gray-500 uppercase tracking-widest">Koleksi Pilihan</p></div>
+            <div><p class="text-2xl font-black">2.4k</p><p class="text-[10px] text-gray-500 uppercase tracking-widest">Pembaca Aktif</p></div>
+            <div><p class="text-2xl font-black">15m</p><p class="text-[10px] text-gray-500 uppercase tracking-widest">Akses Instan</p></div>
         </div>
     </header>
 
-    <div id="overlay" onclick="togSidebar()" class="fixed inset-0 bg-black/50 z-[60] hidden"></div>
-    <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full w-72 bg-[#0F172A] z-[70] -translate-x-full p-6 text-white shadow-2xl">
-        <div class="flex justify-between items-center mb-10 border-b border-white/10 pb-4">
-            <span class="text-xl font-bold text-amber-400">KATEGORI</span>
-            <i class="fa-solid fa-xmark text-2xl cursor-pointer" onclick="togSidebar()"></i>
-        </div>
-        <nav class="space-y-2">
-            <button onclick="setGenre('Semua')" class="w-full text-left p-4 rounded-xl hover:bg-amber-500 transition font-semibold">Semua Koleksi</button>
-            ${LIST_GENRE.map(g => `<button onclick="setGenre('${g}')" class="w-full text-left p-4 rounded-xl hover:bg-white/5 transition">${g}</button>`).join('')}
-        </nav>
-    </aside>
-
-    <main class="max-w-6xl mx-auto p-5">
-        <div class="bg-[#0B4D74] rounded-[2rem] p-8 text-white mb-8 flex justify-between items-center overflow-hidden relative shadow-lg">
-            <div>
-                <h2 class="text-2xl font-black mb-2 uppercase">Katalog Premium</h2>
-                <p class="text-blue-200 text-sm italic">Dapatkan E-Book pilihan dalam format digital.</p>
+    <main class="max-w-7xl mx-auto px-6 pb-24">
+        <div id="grid" class="grid grid-cols-2 lg:grid-cols-4 gap-8">
             </div>
-            <i class="fa-solid fa-book-open text-7xl opacity-20 rotate-12"></i>
-        </div>
-
-        <h3 id="viewTitle" class="text-lg font-bold mb-6 text-slate-400 uppercase tracking-widest">Memuat Katalog...</h3>
-        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
     </main>
 
-    <div id="cartModal" class="fixed inset-0 z-[100] bg-black/80 hidden items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl">
-            <h3 class="text-2xl font-black text-[#0B4D74] mb-4">Checkout</h3>
-            <div id="cartList" class="space-y-3 mb-6 border-b pb-4 max-h-48 overflow-auto"></div>
-            <div class="flex justify-between font-bold text-xl mb-6">
-                <span>Total:</span> <span id="cartTotal" class="text-amber-500">Rp 0</span>
+    <footer class="border-t border-white/5 py-20 px-6 text-center">
+        <h1 class="text-2xl font-black mb-4 tracking-tighter italic">E-BOOK <span class="text-blue-500">JESTRI</span></h1>
+        <p class="text-gray-600 text-xs mb-8 tracking-widest uppercase">© 2026 E-BOOK JESTRI. All Rights Reserved.</p>
+        <div class="flex justify-center gap-6 text-gray-400 text-xl">
+            <a href="https://wa.me/6285189415489" class="hover:text-blue-500"><i class="fa-brands fa-whatsapp"></i></a>
+            <a href="https://instagram.com/jesssstri" class="hover:text-blue-500"><i class="fa-brands fa-instagram"></i></a>
+        </div>
+    </footer>
+
+    <div id="md" class="fixed inset-0 z-[200] bg-black/95 hidden items-center justify-center p-4">
+        <div class="bg-[#111] w-full max-w-md rounded-[2.5rem] p-10 border border-white/5">
+            <h3 class="text-2xl font-black mb-2">Investasi Pengetahuan.</h3>
+            <p class="text-gray-500 text-xs mb-8">Selesaikan langkah untuk mendapatkan Akses Instan.</p>
+            <div id="cl" class="space-y-3 mb-8 border-b border-white/5 pb-6"></div>
+            <div class="flex justify-between font-black text-xl mb-8">
+                <span class="text-gray-400">Total Investasi</span>
+                <span id="ct" class="text-blue-500">Rp 0</span>
             </div>
-            <div class="bg-slate-50 p-4 rounded-2xl mb-6 text-center border">
-                <p class="text-[10px] font-black mb-2 uppercase">Transfer Dana: <span class="text-blue-600">0895327806441</span></p>
-                <input type="file" id="inputBukti" class="hidden" onchange="document.getElementById('fileLabel').innerText='✅ Gambar Siap'">
-                <label id="fileLabel" for="inputBukti" class="block bg-white border-2 border-dashed p-3 rounded-xl cursor-pointer text-xs font-bold text-slate-500">UPLOAD BUKTI TRANSFER</label>
+            <div class="bg-white/5 p-6 rounded-3xl mb-8 border border-white/5">
+                <p class="text-[10px] font-black text-center text-blue-400 mb-4 tracking-widest uppercase italic">DANA: 0895327806441</p>
+                <input type="file" id="fi" class="hidden" onchange="document.getElementById('lt').innerText='✅ BUKTI SIAP'">
+                <label for="fi" class="block border border-dashed border-white/10 p-5 rounded-2xl text-center cursor-pointer hover:bg-white/5">
+                    <span id="lt" class="text-xs font-bold text-gray-400 uppercase">Upload Bukti Transfer</span>
+                </label>
             </div>
-            <button onclick="orderNow()" id="btnOrder" class="w-full bg-[#0B4D74] text-white py-5 rounded-2xl font-black shadow-lg">KONFIRMASI PEMBAYARAN</button>
-            <button onclick="togCart()" class="w-full mt-3 text-sm text-slate-400 font-bold">Batal</button>
+            <button onclick="pay()" id="bp" class="btn-vip w-full text-white py-6 rounded-2xl font-black text-sm tracking-widest uppercase">Konfirmasi & Akses Instan</button>
+            <button onclick="togCart()" class="w-full mt-4 text-gray-600 text-[10px] font-black uppercase tracking-widest">Batal</button>
         </div>
     </div>
 
     <script>
-        let books = [], cart = [];
-
-        async function init() {
-            try {
-                const r = await fetch('/api/buku-json');
-                books = await r.json();
-                render('Semua');
-            } catch (e) { console.error("Gagal load buku", e); }
+        let allB = [], cart = [];
+        async function load(){
+            const r = await fetch('/api/buku-json'); allB = await r.json();
+            render(allB);
         }
-
-        function togSidebar() {
-            document.getElementById('sidebar').classList.toggle('-translate-x-full');
-            document.getElementById('overlay').classList.toggle('hidden');
-        }
-
-        function setGenre(g) {
-            render(g);
-            togSidebar();
-        }
-
-        function render(g) {
-            const grid = document.getElementById('grid');
-            const title = document.getElementById('viewTitle');
-            title.innerText = g === 'Semua' ? 'Semua Koleksi' : g;
-            
-            const filtered = g === 'Semua' ? books : books.filter(b => b.genre === g);
-            
-            grid.innerHTML = filtered.map(b => \`
-                <div class="book-card shadow-sm flex flex-col h-full">
-                    <img src="\${b.gambar}" class="w-full aspect-[3/4] object-cover bg-slate-200" alt="Cover">
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h4 class="font-bold text-sm text-slate-800 line-clamp-2 mb-4">\${b.judul}</h4>
-                        <div class="mt-auto flex justify-between items-center">
-                            <span class="font-black text-[#0B4D74] text-sm">Rp \${b.harga.toLocaleString()}</span>
-                            <button onclick="addToCart('\${b._id}')" class="w-10 h-10 bg-amber-500 text-white rounded-xl shadow-lg flex items-center justify-center"><i class="fa-solid fa-plus"></i></button>
+        function togSide(){ document.getElementById('sb').classList.toggle('-translate-x-full'); document.getElementById('ov').classList.toggle('hidden'); }
+        function render(data){
+            document.getElementById('grid').innerHTML = data.map(b => \`
+                <div class="book-card group">
+                    <div class="aspect-[3/4] overflow-hidden bg-[#222]">
+                        <img src="\${b.gambar}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src='https://placehold.co/400x600/0A0A0A/333?text=E-BOOK+JESTRI'">
+                    </div>
+                    <div class="p-6">
+                        <p class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-2">\${b.genre}</p>
+                        <h4 class="font-bold text-sm leading-tight h-10 mb-4 line-clamp-2">\${b.judul}</h4>
+                        <div class="flex justify-between items-center">
+                            <span class="text-lg font-black tracking-tighter italic">Rp \${b.investasi.toLocaleString()}</span>
+                            <button onclick="add('\${b._id}')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-blue-500 transition"><i class="fa-solid fa-plus text-xs"></i></button>
                         </div>
                     </div>
                 </div>\`).join('');
         }
-
-        function addToCart(id) {
-            const b = books.find(x => x._id === id);
-            if(!cart.find(x => x._id === id)) {
-                cart.push(b);
-                document.getElementById('cartCount').innerText = cart.length;
-            }
+        function add(id){
+            const b = allB.find(x=>x._id===id); if(!cart.find(x=>x._id===id)) cart.push(b);
+            document.getElementById('cartCount').innerText = cart.length;
         }
-
-        function togCart() {
-            if(!cart.length) return alert("Pilih buku dulu!");
-            const modal = document.getElementById('cartModal');
-            modal.classList.toggle('hidden');
-            modal.style.display = modal.classList.contains('hidden') ? 'none' : 'flex';
-            
-            document.getElementById('cartList').innerHTML = cart.map(x => \`<div class="flex justify-between text-xs font-bold"><span>\${x.judul}</span><span>Rp \${x.harga.toLocaleString()}</span></div>\`).join('');
-            document.getElementById('cartTotal').innerText = 'Rp ' + cart.reduce((a,b) => a+b.harga, 0).toLocaleString();
+        function filterG(g){ render(g==='Semua'?allB:allB.filter(x=>x.genre===g)); togSide(); }
+        function togCart(){
+            if(!cart.length) return alert("Pilih literatur Anda.");
+            const m = document.getElementById('md');
+            m.classList.toggle('hidden'); m.style.display = m.classList.contains('hidden') ? 'none' : 'flex';
+            document.getElementById('cl').innerHTML = cart.map(x=>\`<div class="flex justify-between text-[11px] font-bold"><span>\${x.judul}</span><span class="text-blue-500">Rp \${x.investasi.toLocaleString()}</span></div>\`).join('');
+            document.getElementById('ct').innerText = 'Rp ' + cart.reduce((a,b)=>a+b.investasi,0).toLocaleString();
         }
-
-        async function orderNow() {
-            const f = document.getElementById('inputBukti').files[0];
-            if(!f) return alert("Upload bukti transfer!");
-            const btn = document.getElementById('btnOrder');
-            btn.disabled = true; btn.innerText = "SEDANG MENGIRIM...";
-
-            const fd = new FormData();
-            fd.append('file', f);
-            fd.append('upload_preset', 'ml_default');
-            
-            try {
-                const up = await (await fetch('https://api.cloudinary.com/v1_1/dxtp7vsqy/image/upload', {method:'POST', body:fd})).json();
-                await fetch('/api/order', {
-                    method: 'POST',
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({ items: cart, total: cart.reduce((a,b) => a+b.harga, 0), bukti: up.secure_url })
-                });
-                alert("✅ Berhasil! Admin akan segera memverifikasi.");
-                location.reload();
-            } catch (e) { alert("Gagal kirim pesanan."); btn.disabled = false; }
+        async function pay(){
+            const f = document.getElementById('fi').files[0]; if(!f) return alert("Sertakan bukti investasi.");
+            const btn = document.getElementById('bp'); btn.disabled = true; btn.innerText = "VERIFYING...";
+            const fd = new FormData(); fd.append('file', f); fd.append('upload_preset', 'ml_default');
+            const up = await (await fetch('https://api.cloudinary.com/v1_1/dxtp7vsqy/image/upload',{method:'POST',body:fd})).json();
+            await fetch('/api/order', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({items:cart, total:cart.reduce((a,b)=>a+b.investasi,0), bukti:up.secure_url}) });
+            alert("Terima kasih. Tim kami akan memproses akses Anda dalam < 15 menit.");
+            location.reload();
         }
-
-        init();
+        load();
     </script></body></html>`);
 });
 
-// --- 2. TAMPILAN ADMIN (FIX BUKTI TF & APPROVE) ---
+// --- 2. ADMIN: ELITE MANAGEMENT (SECRET URL) ---
 app.get('/admin', async (req, res) => {
     if (!req.session.admin) return res.redirect('/login');
     const b = await Buku.find().sort({_id:-1});
     const o = await Order.find({status:'Pending'});
-
-    res.send(`<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
-    <body class="bg-slate-50 p-6">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="text-3xl font-black mb-8 border-b pb-4">E-BOOK JESTRI <span class="text-blue-600">ADMIN</span></h1>
-
-            <div class="bg-white p-8 rounded-[2rem] shadow-sm mb-10">
-                <h3 class="font-bold mb-4">Input Katalog Baru</h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <input id="j" placeholder="Judul" class="p-4 bg-slate-50 rounded-xl outline-none">
-                    <input id="p" placeholder="Penulis" class="p-4 bg-slate-50 rounded-xl outline-none">
-                    <input id="h" type="number" placeholder="Harga" class="p-4 bg-slate-50 rounded-xl outline-none">
-                    <select id="g" class="p-4 bg-slate-50 rounded-xl outline-none">${LIST_GENRE.map(g=>`<option>${g}</option>`).join('')}</select>
-                </div>
-                <input type="file" id="fileBuku" class="mt-4 block w-full text-xs">
-                <button onclick="uploadBuku()" id="btnSave" class="w-full bg-slate-800 text-white py-4 rounded-xl mt-6 font-bold uppercase tracking-widest shadow-xl">Simpan Katalog</button>
-            </div>
-
-            <h3 class="font-bold mb-4 text-amber-600">Daftar Pesanan Masuk (${o.length})</h3>
-            <div class="space-y-6">
-                ${o.map(x => `
-                <div class="bg-white p-6 rounded-[2rem] shadow-md border-2 border-slate-100">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <p class="font-bold text-xs text-slate-400 mb-2">BUKTI TRANSFER PEMBELI:</p>
-                            <img src="${x.bukti}" class="w-full rounded-xl border" style="max-height:300px; object-fit:contain; background:#f8fafc">
-                        </div>
-                        <div class="flex flex-col">
-                            <h4 class="text-xl font-black text-blue-900 mb-2">Total: Rp ${x.total.toLocaleString()}</h4>
-                            <p class="text-[10px] text-slate-400 mb-6 font-bold uppercase tracking-wider">Item: ${x.items.map(i=>i.judul).join(', ')}</p>
-                            
-                            <input id="media-${x._id}" placeholder="TEMPEL LINK MEDIAFIRE DI SINI" class="w-full p-4 border rounded-xl mb-4 text-xs font-bold bg-blue-50 border-blue-200 outline-none">
-                            
-                            <div class="flex gap-2">
-                                <button onclick="approveOrder('${x._id}')" class="flex-grow bg-green-600 text-white py-4 rounded-xl font-black shadow-lg">APPROVE & KIRIM</button>
-                                <button onclick="delOrder('${x._id}')" class="bg-red-500 text-white px-6 rounded-xl font-black">X</button>
-                            </div>
-                        </div>
+    res.send(`<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"></script></head>
+    <body class="bg-[#0A0A0A] text-white p-8 font-sans">
+        <div class="max-w-6xl mx-auto">
+            <h1 class="text-3xl font-black mb-12 italic tracking-tighter">ELITE <span class="text-blue-500">CONTROL</span></h1>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div class="bg-[#111] p-8 rounded-[2rem] border border-white/5 h-fit">
+                    <h3 class="font-bold mb-6 text-blue-500 uppercase tracking-widest text-xs">Tambah Koleksi</h3>
+                    <div class="space-y-4">
+                        <input id="j" placeholder="Judul Literatur" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">
+                        <input id="p" placeholder="Penulis" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">
+                        <input id="h" type="number" placeholder="Investasi (Nominal)" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">
+                        <select id="g" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">${LIST_GENRE.map(g=>`<option>${g}</option>`).join('')}</select>
+                        <input type="file" id="fi" class="text-xs text-gray-500">
+                        <button onclick="saveB()" id="bs" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl">Simpan Koleksi</button>
                     </div>
-                </div>`).join('') || '<p class="text-center py-10 text-slate-400">Belum ada pesanan.</p>'}
+                </div>
+
+                <div class="lg:col-span-2">
+                    <h3 class="font-bold mb-6 text-blue-500 uppercase tracking-widest text-xs italic">Verifikasi Investasi (${o.length})</h3>
+                    <div class="space-y-8">
+                        ${o.map(x => `
+                        <div class="bg-[#111] p-8 rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row gap-8">
+                            <img src="${x.bukti}" class="w-full md:w-56 h-72 object-cover rounded-3xl border border-white/10" onerror="this.src='https://placehold.co/400x600/333/666?text=Bukti+Gagal+Muat'">
+                            <div class="flex-grow">
+                                <h4 class="text-2xl font-black mb-2 italic text-blue-500">Rp ${x.total.toLocaleString()}</h4>
+                                <p class="text-[10px] text-gray-500 mb-6 font-bold uppercase tracking-widest">${x.items.map(i=>i.judul).join(' • ')}</p>
+                                <input id="link-${x._id}" placeholder="Link MediaFire" class="w-full p-4 bg-black border border-blue-900 rounded-2xl mb-4 text-xs">
+                                <div class="flex gap-3">
+                                    <button onclick="acc('${x._id}')" class="flex-grow bg-blue-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg">Setujui</button>
+                                    <button onclick="delO('${x._id}')" class="bg-red-900/20 text-red-500 px-6 rounded-2xl font-black text-xs">X</button>
+                                </div>
+                            </div>
+                        </div>`).join('') || '<p class="text-gray-600 italic py-20 text-center border border-dashed border-white/5 rounded-3xl">Antrean verifikasi kosong.</p>'}
+                    </div>
+                </div>
             </div>
         </div>
-
         <script>
-            async function uploadBuku(){
-                const f = document.getElementById('fileBuku').files[0]; if(!f) return alert("Pilih cover!");
-                const btn = document.getElementById('btnSave'); btn.innerText = "SAVING..."; btn.disabled = true;
+            async function saveB(){
+                const f = document.getElementById('fi').files[0]; if(!f) return alert("Cover diperlukan.");
+                const btn = document.getElementById('bs'); btn.disabled = true; btn.innerText = "UPLOADING...";
                 const fd = new FormData(); fd.append('file', f); fd.append('upload_preset', 'ml_default');
-                try {
-                    const up = await (await fetch('https://api.cloudinary.com/v1_1/dxtp7vsqy/image/upload',{method:'POST',body:fd})).json();
-                    await fetch('/admin/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({judul:document.getElementById('j').value, penulis:document.getElementById('p').value, harga:Number(document.getElementById('h').value), genre:document.getElementById('g').value, gambar:up.secure_url})});
-                    location.reload();
-                } catch(e) { alert("Error!"); btn.disabled = false; }
-            }
-
-            async function approveOrder(id){
-                const link = document.getElementById('media-'+id).value;
-                if(!link) return alert("Isi link MediaFire pembeli dulu!");
-                await fetch('/admin/approve/'+id, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({downloadLink: link}) });
-                alert("Order Berhasil Disetujui!");
+                const up = await (await fetch('https://api.cloudinary.com/v1_1/dxtp7vsqy/image/upload',{method:'POST',body:fd})).json();
+                await fetch('/admin/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({judul:document.getElementById('j').value, penulis:document.getElementById('p').value, investasi:Number(document.getElementById('h').value), genre:document.getElementById('g').value, gambar:up.secure_url})});
                 location.reload();
             }
-
-            async function delOrder(id){ if(confirm('Hapus pesanan?')) { await fetch('/admin/del-order/'+id, {method:'DELETE'}); location.reload(); } }
+            async function acc(id){
+                const link = document.getElementById('link-'+id).value; if(!link) return alert("Link MediaFire wajib diisi.");
+                await fetch('/admin/approve/'+id, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({downloadLink: link}) });
+                alert("Akses Instan dikirim."); location.reload();
+            }
+            async function delO(id){ if(confirm('Tolak?')) { await fetch('/admin/del-order/'+id,{method:'DELETE'}); location.reload(); } }
         </script>
     </body></html>`);
 });
 
-// --- API & LOGIN (STABIL) ---
-app.get('/login', (req, res) => { res.send(`<!DOCTYPE html><html><body style="background:#0F172A; display:flex; align-items:center; justify-content:center; height:100vh;"><form action="/login" method="POST" style="background:#1e293b; padding:40px; border-radius:20px; color:white; text-align:center;"><h2>ADMIN JESTRI</h2><input name="pw" type="password" placeholder="Passcode" style="padding:15px; border-radius:10px; border:none; margin-bottom:15px; text-align:center;"><br><button style="padding:15px 40px; border-radius:10px; border:none; background:#0ea5e9; color:white; font-weight:bold; cursor:pointer;">MASUK</button></form></body></html>`); });
+// --- API & LOGIN (HIDDEN SECURITY) ---
+app.get('/login', (req, res) => { res.send(`<!DOCTYPE html><html><body style="background:#0A0A0A; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif;"><form action="/login" method="POST" style="text-align:center;"><input name="pw" type="password" placeholder="Elite Access Code" style="padding:20px; border-radius:15px; border:1px solid #333; background:#111; color:white; width:250px; text-align:center; margin-bottom:15px;"><br><button style="color:#007AFF; font-weight:900; background:none; border:none; cursor:pointer;">VERIFY ACCESS</button></form></body></html>`); });
 app.post('/login', (req, res) => { if (req.body.pw === 'JESTRI0301209') req.session.admin = true; res.redirect('/admin'); });
 app.post('/admin/save', async (req, res) => { if(req.session.admin) await new Buku(req.body).save(); res.json({ok:true}); });
 app.post('/admin/approve/:id', async (req, res) => { if(req.session.admin) await Order.findByIdAndUpdate(req.params.id, { status: 'Approved', downloadLink: req.body.downloadLink }); res.json({ok:true}); });
