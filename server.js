@@ -3,233 +3,245 @@ const mongoose = require('mongoose');
 const cookieSession = require('cookie-session');
 const app = express();
 
-// --- DATABASE & SCHEMA ---
+// --- 1. CORE SYSTEM & DATABASE ---
 const MONGO_URI = 'mongodb+srv://JESTRI:JESTRI0301209@cluster0.tprp2r7.mongodb.net/ebook_jestri?retryWrites=true&w=majority';
-mongoose.connect(MONGO_URI).then(() => console.log("💎 Secure Connection Established")).catch(e => console.error(e));
+mongoose.connect(MONGO_URI).then(() => console.log("💎 JESTRI CORE ACTIVE")).catch(e => console.error("DB Error:", e));
 
-const Buku = mongoose.model('Buku', { 
-    judul: String, penulis: String, investasi: Number, gambar: String, genre: String, status: String 
-});
-const Order = mongoose.model('Order', { 
-    items: Array, total: Number, bukti: String, status: { type: String, default: 'Pending' }, downloadLink: String, createdAt: { type: Date, default: Date.now } 
-});
+const Buku = mongoose.model('Buku', { judul: String, penulis: String, investasi: Number, gambar: String, genre: String });
+const Order = mongoose.model('Order', { items: Array, total: Number, bukti: String, status: { type: String, default: 'Pending' }, downloadLink: String });
 
 const LIST_GENRE = ['Bisnis', 'Teknologi', 'Fiksi', 'Edukasi', 'Misteri', 'Komik', 'Sejarah'];
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(cookieSession({ name: 'jestri_vip_2026', keys: ['ELITE_ACCESS'], maxAge: 24 * 60 * 60 * 1000 }));
+app.use(cookieSession({ name: 'jestri_final_session', keys: ['ELITE_KEY_2026'], maxAge: 24 * 60 * 60 * 1000 }));
 
-// --- 1. FRONTEND: E-BOOK JESTRI (ESTETIKA RICH BLACK) ---
+// --- 2. THE VISIONARY FRONTEND ---
 app.get('/', (req, res) => {
     res.send(`<!DOCTYPE html><html lang="id"><head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-BOOK JESTRI | Digital Literacy, Redefined</title>
+    <title>E-BOOK JESTRI | Digital Literacy Redefined</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        :root { --rich-black: #0A0A0A; --elegant-blue: #007AFF; --card-bg: #161618; }
-        body { font-family: 'Inter', sans-serif; background: var(--rich-black); color: #ffffff; scroll-smooth: always; }
-        .glass { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .book-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.03); transition: all 0.4s ease; border-radius: 20px; overflow: hidden; }
-        .book-card:hover { transform: translateY(-10px); border-color: var(--elegant-blue); box-shadow: 0 20px 40px rgba(0,122,255,0.1); }
-        .sidebar { transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); background: #0F0F11; border-right: 1px solid rgba(255,255,255,0.05); }
-        .btn-vip { background: var(--elegant-blue); transition: 0.3s; box-shadow: 0 10px 20px rgba(0,122,255,0.3); }
-        .btn-vip:hover { transform: scale(1.05); box-shadow: 0 15px 30px rgba(0,122,255,0.5); }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+        :root { --rich-black: #0A0A0A; --elegant-blue: #007AFF; }
+        body { font-family: 'Inter', sans-serif; background: var(--rich-black); color: white; margin: 0; overflow-x: hidden; }
+        .glass { background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(25px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sidebar { transition: 0.5s transform cubic-bezier(0.16, 1, 0.3, 1); background: #0F0F11; border-right: 1px solid rgba(255,255,255,0.05); }
+        .book-card { background: #161618; border-radius: 24px; transition: 0.4s; overflow: hidden; border: 1px solid rgba(255,255,255,0.03); }
+        .book-card:hover { transform: translateY(-10px); border-color: var(--elegant-blue); }
+        .btn-pay { background: var(--elegant-blue); box-shadow: 0 15px 30px rgba(0,122,255,0.3); transition: 0.3s; }
+        .btn-pay:hover { opacity: 0.9; transform: scale(1.02); }
     </style></head><body>
 
-    <nav class="glass sticky top-0 z-[100] px-6 py-5">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-6">
-                <i class="fa-solid fa-bars-staggered text-xl cursor-pointer hover:text-blue-500 transition" onclick="togSide()"></i>
-                <h1 class="text-xl font-extrabold tracking-tighter">E-BOOK <span class="text-blue-500">JESTRI</span></h1>
-            </div>
-            <div class="flex items-center gap-6">
-                <div class="hidden md:flex gap-8 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">
-                    <a href="#" class="hover:text-white transition">Eksplorasi</a>
-                    <a href="#" class="hover:text-white transition">Koleksi</a>
-                    <a href="#" class="hover:text-white transition">Tentang</a>
-                </div>
-                <button onclick="togCart()" class="bg-white/5 p-3 px-5 rounded-full border border-white/10 hover:bg-white/10 transition">
-                    <i class="fa-solid fa-bag-shopping text-blue-500"></i> <span id="cartCount" class="ml-2 font-bold text-xs">0</span>
-                </button>
-            </div>
+    <nav class="glass sticky top-0 z-[100] p-5 px-8 flex justify-between items-center">
+        <div class="flex items-center gap-6">
+            <i class="fa-solid fa-bars-staggered text-xl cursor-pointer hover:text-blue-500" onclick="togSide(true)"></i>
+            <h1 class="text-xl font-black tracking-tighter uppercase italic">E-BOOK <span class="text-blue-500">JESTRI</span></h1>
         </div>
+        <button onclick="togCart(true)" class="bg-white/5 p-3 px-6 rounded-full border border-white/10 hover:bg-white/10 transition">
+            <i class="fa-solid fa-cart-flatbed-suitcases text-blue-500 mr-2"></i> <span id="cartCount" class="font-bold">0</span>
+        </button>
     </nav>
 
-    <div id="ov" onclick="togSide()" class="fixed inset-0 bg-black/80 z-[110] hidden backdrop-blur-sm"></div>
-    <aside id="sb" class="sidebar fixed top-0 left-0 h-full w-80 z-[120] -translate-x-full p-10">
-        <div class="flex justify-between items-center mb-12">
-            <span class="text-xs font-black tracking-[0.3em] text-gray-500">KATEGORI VIP</span>
-            <i class="fa-solid fa-xmark cursor-pointer text-gray-500" onclick="togSide()"></i>
+    <div id="ov" onclick="togSide(false)" class="fixed inset-0 bg-black/90 z-[110] hidden backdrop-blur-md"></div>
+    <aside id="sb" class="sidebar fixed top-0 left-0 h-full w-80 z-[120] -translate-x-full p-10 flex flex-col">
+        <div class="flex justify-between items-center mb-16">
+            <span class="text-[10px] font-black tracking-[0.4em] text-gray-500">KATEGORI</span>
+            <i class="fa-solid fa-xmark cursor-pointer" onclick="togSide(false)"></i>
         </div>
-        <div class="space-y-4">
-            <button onclick="filterG('Semua')" class="w-full text-left p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-blue-500 transition text-sm font-bold">Semua Koleksi</button>
-            ${LIST_GENRE.map(g => `<button onclick="filterG('${g}')" class="w-full text-left p-4 rounded-2xl border border-transparent hover:bg-white/5 hover:border-white/10 transition text-sm text-gray-400 hover:text-white">${g}</button>`).join('')}
+        <div class="space-y-3">
+            <button onclick="setFilter('Semua')" class="w-full text-left p-4 rounded-2xl bg-white/5 font-bold hover:bg-blue-600 transition">Semua Koleksi</button>
+            ${LIST_GENRE.map(g => `<button onclick="setFilter('${g}')" class="w-full text-left p-4 rounded-2xl hover:bg-white/5 transition text-gray-400 hover:text-white">${g}</button>`).join('')}
         </div>
     </aside>
 
-    <header class="py-24 px-6 text-center max-w-5xl mx-auto">
-        <span class="text-[10px] font-black tracking-[0.5em] text-blue-500 uppercase mb-6 block">Digital Literacy, Redefined</span>
-        <h2 class="text-5xl md:text-7xl font-extrabold leading-tight mb-8">Definisi Baru <br> Literasi Digital <span class="text-gray-500 italic">Masa Kini.</span></h2>
-        <p class="text-gray-400 text-lg md:text-xl leading-relaxed mb-12 max-w-3xl mx-auto font-light">E-BOOK JESTRI memadukan teknologi web modern dengan estetika tinggi untuk menghadirkan ekosistem literatur digital premium.</p>
-        <div class="flex justify-center gap-12 text-center border-y border-white/5 py-8 mb-12">
-            <div><p class="text-2xl font-black">500+</p><p class="text-[10px] text-gray-500 uppercase tracking-widest">Koleksi Pilihan</p></div>
-            <div><p class="text-2xl font-black">2.4k</p><p class="text-[10px] text-gray-500 uppercase tracking-widest">Pembaca Aktif</p></div>
-            <div><p class="text-2xl font-black">15m</p><p class="text-[10px] text-gray-500 uppercase tracking-widest">Akses Instan</p></div>
-        </div>
-    </header>
+    <main class="max-w-7xl mx-auto p-8 py-16">
+        <header class="mb-16">
+            <h2 id="vTitle" class="text-4xl font-black mb-2 tracking-tighter">Investasi Literasi Digital</h2>
+            <p class="text-gray-500 uppercase text-[10px] tracking-[0.3em] font-bold">VIP Membership Access Only</p>
+        </header>
 
-    <main class="max-w-7xl mx-auto px-6 pb-24">
         <div id="grid" class="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            </div>
+            <div class="h-80 bg-white/5 animate-pulse rounded-3xl"></div>
+            <div class="h-80 bg-white/5 animate-pulse rounded-3xl"></div>
+        </div>
     </main>
 
-    <footer class="border-t border-white/5 py-20 px-6 text-center">
-        <h1 class="text-2xl font-black mb-4 tracking-tighter italic">E-BOOK <span class="text-blue-500">JESTRI</span></h1>
-        <p class="text-gray-600 text-xs mb-8 tracking-widest uppercase">© 2026 E-BOOK JESTRI. All Rights Reserved.</p>
-        <div class="flex justify-center gap-6 text-gray-400 text-xl">
-            <a href="https://wa.me/6285189415489" class="hover:text-blue-500"><i class="fa-brands fa-whatsapp"></i></a>
-            <a href="https://instagram.com/jesssstri" class="hover:text-blue-500"><i class="fa-brands fa-instagram"></i></a>
-        </div>
-    </footer>
-
-    <div id="md" class="fixed inset-0 z-[200] bg-black/95 hidden items-center justify-center p-4">
-        <div class="bg-[#111] w-full max-w-md rounded-[2.5rem] p-10 border border-white/5">
-            <h3 class="text-2xl font-black mb-2">Investasi Pengetahuan.</h3>
-            <p class="text-gray-500 text-xs mb-8">Selesaikan langkah untuk mendapatkan Akses Instan.</p>
-            <div id="cl" class="space-y-3 mb-8 border-b border-white/5 pb-6"></div>
-            <div class="flex justify-between font-black text-xl mb-8">
-                <span class="text-gray-400">Total Investasi</span>
-                <span id="ct" class="text-blue-500">Rp 0</span>
+    <div id="md" class="fixed inset-0 z-[200] bg-black/95 hidden items-center justify-center p-4 backdrop-blur-xl">
+        <div class="bg-[#111] w-full max-w-md rounded-[2.5rem] p-10 border border-white/5 shadow-2xl">
+            <h3 class="text-2xl font-black mb-6">Konfirmasi Akses.</h3>
+            <div id="cartList" class="space-y-4 mb-8 border-b border-white/5 pb-6"></div>
+            <div class="flex justify-between font-black text-xl mb-10">
+                <span class="text-gray-500">Total Investasi</span>
+                <span id="cartTotal" class="text-blue-500">Rp 0</span>
             </div>
-            <div class="bg-white/5 p-6 rounded-3xl mb-8 border border-white/5">
-                <p class="text-[10px] font-black text-center text-blue-400 mb-4 tracking-widest uppercase italic">DANA: 0895327806441</p>
-                <input type="file" id="fi" class="hidden" onchange="document.getElementById('lt').innerText='✅ BUKTI SIAP'">
-                <label for="fi" class="block border border-dashed border-white/10 p-5 rounded-2xl text-center cursor-pointer hover:bg-white/5">
-                    <span id="lt" class="text-xs font-bold text-gray-400 uppercase">Upload Bukti Transfer</span>
+            <div class="bg-black p-6 rounded-3xl mb-8 border border-white/5">
+                <p class="text-[10px] font-black text-blue-400 text-center mb-4 tracking-widest uppercase">DANA: 0895327806441</p>
+                <input type="file" id="fi" class="hidden" onchange="document.getElementById('ftxt').innerText='✅ BUKTI SIAP'">
+                <label for="fi" class="block border-2 border-dashed border-white/10 p-5 rounded-2xl text-center cursor-pointer hover:border-blue-500 transition">
+                    <span id="ftxt" class="text-xs font-bold text-gray-500 uppercase">Upload Bukti Transfer</span>
                 </label>
             </div>
-            <button onclick="pay()" id="bp" class="btn-vip w-full text-white py-6 rounded-2xl font-black text-sm tracking-widest uppercase">Konfirmasi & Akses Instan</button>
-            <button onclick="togCart()" class="w-full mt-4 text-gray-600 text-[10px] font-black uppercase tracking-widest">Batal</button>
+            <button onclick="prosesBayar()" id="btnBayar" class="btn-pay w-full py-6 rounded-2xl font-black text-sm tracking-widest uppercase shadow-xl">Dapatkan Akses Sekarang</button>
+            <button onclick="togCart(false)" class="w-full mt-6 text-gray-600 text-[10px] font-bold uppercase tracking-widest">Kembali Eksplorasi</button>
         </div>
     </div>
 
     <script>
-        let allB = [], cart = [];
-        async function load(){
-            const r = await fetch('/api/buku-json'); allB = await r.json();
-            render(allB);
+        let books = [], cart = [];
+
+        async function init() {
+            const r = await fetch('/api/buku-json');
+            books = await r.json();
+            render('Semua');
         }
-        function togSide(){ document.getElementById('sb').classList.toggle('-translate-x-full'); document.getElementById('ov').classList.toggle('hidden'); }
-        function render(data){
-            document.getElementById('grid').innerHTML = data.map(b => \`
+
+        function togSide(st) {
+            document.getElementById('sb').style.transform = st ? 'translateX(0)' : 'translateX(-100%)';
+            document.getElementById('ov').classList.toggle('hidden', !st);
+        }
+
+        function setFilter(g) {
+            document.getElementById('vTitle').innerText = g === 'Semua' ? 'Investasi Literasi Digital' : g;
+            render(g);
+            togSide(false);
+        }
+
+        function render(g) {
+            const grid = document.getElementById('grid');
+            const data = g === 'Semua' ? books : books.filter(b => b.genre === g);
+            grid.innerHTML = data.map(b => \`
                 <div class="book-card group">
                     <div class="aspect-[3/4] overflow-hidden bg-[#222]">
-                        <img src="\${b.gambar}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src='https://placehold.co/400x600/0A0A0A/333?text=E-BOOK+JESTRI'">
+                        <img src="\${b.gambar}" crossorigin="anonymous" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" onerror="this.src='https://placehold.co/400x600/0A0A0A/FFF?text=E-BOOK+JESTRI'">
                     </div>
                     <div class="p-6">
-                        <p class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-2">\${b.genre}</p>
-                        <h4 class="font-bold text-sm leading-tight h-10 mb-4 line-clamp-2">\${b.judul}</h4>
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-black tracking-tighter italic">Rp \${b.investasi.toLocaleString()}</span>
-                            <button onclick="add('\${b._id}')" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-blue-500 transition"><i class="fa-solid fa-plus text-xs"></i></button>
+                        <p class="text-[10px] text-blue-500 font-black uppercase mb-1">\${b.genre}</p>
+                        <h4 class="font-bold text-sm h-10 line-clamp-2 mb-4">\${b.judul}</h4>
+                        <div class="flex justify-between items-center pt-4 border-t border-white/5">
+                            <span class="font-black text-lg">Rp \${b.investasi.toLocaleString()}</span>
+                            <button onclick="addCart('\${b._id}')" class="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-blue-600 transition"><i class="fa-solid fa-plus text-xs"></i></button>
                         </div>
                     </div>
                 </div>\`).join('');
         }
-        function add(id){
-            const b = allB.find(x=>x._id===id); if(!cart.find(x=>x._id===id)) cart.push(b);
-            document.getElementById('cartCount').innerText = cart.length;
+
+        function addCart(id) {
+            const b = books.find(x => x._id === id);
+            if(!cart.find(x => x._id === id)) {
+                cart.push(b);
+                document.getElementById('cartCount').innerText = cart.length;
+            }
         }
-        function filterG(g){ render(g==='Semua'?allB:allB.filter(x=>x.genre===g)); togSide(); }
-        function togCart(){
-            if(!cart.length) return alert("Pilih literatur Anda.");
+
+        function togCart(st) {
+            if(st && !cart.length) return alert("Pilih literatur untuk memulai investasi.");
             const m = document.getElementById('md');
-            m.classList.toggle('hidden'); m.style.display = m.classList.contains('hidden') ? 'none' : 'flex';
-            document.getElementById('cl').innerHTML = cart.map(x=>\`<div class="flex justify-between text-[11px] font-bold"><span>\${x.judul}</span><span class="text-blue-500">Rp \${x.investasi.toLocaleString()}</span></div>\`).join('');
-            document.getElementById('ct').innerText = 'Rp ' + cart.reduce((a,b)=>a+b.investasi,0).toLocaleString();
+            m.classList.toggle('hidden', !st);
+            m.style.display = st ? 'flex' : 'none';
+            if(st) {
+                document.getElementById('cartList').innerHTML = cart.map(x => \`<div class="flex justify-between font-bold text-xs uppercase"><span>\${x.judul}</span><span class="text-blue-500">Rp \${x.investasi.toLocaleString()}</span></div>\`).join('');
+                document.getElementById('cartTotal').innerText = 'Rp ' + cart.reduce((a,b)=>a+b.investasi,0).toLocaleString();
+            }
         }
-        async function pay(){
-            const f = document.getElementById('fi').files[0]; if(!f) return alert("Sertakan bukti investasi.");
-            const btn = document.getElementById('bp'); btn.disabled = true; btn.innerText = "VERIFYING...";
-            const fd = new FormData(); fd.append('file', f); fd.append('upload_preset', 'ml_default');
-            const up = await (await fetch('https://api.cloudinary.com/v1_1/dxtp7vsqy/image/upload',{method:'POST',body:fd})).json();
-            await fetch('/api/order', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({items:cart, total:cart.reduce((a,b)=>a+b.investasi,0), bukti:up.secure_url}) });
-            alert("Terima kasih. Tim kami akan memproses akses Anda dalam < 15 menit.");
-            location.reload();
+
+        async function prosesBayar() {
+            const f = document.getElementById('fi').files[0];
+            if(!f) return alert("Upload bukti transfer wajib.");
+            const btn = document.getElementById('btnBayar');
+            btn.disabled = true; btn.innerText = "MENGIRIM...";
+
+            const fd = new FormData();
+            fd.append('file', f);
+            fd.append('upload_preset', 'ml_default');
+            
+            try {
+                const up = await (await fetch('https://api.cloudinary.com/v1_1/dxtp7vsqy/image/upload',{method:'POST',body:fd})).json();
+                await fetch('/api/order', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ items: cart, total: cart.reduce((a,b)=>a+b.investasi,0), bukti: up.secure_url })
+                });
+                alert("✅ Investasi Berhasil! Admin akan memproses dalam < 15 menit.");
+                location.reload();
+            } catch(e) { alert("Sistem sibuk, coba lagi."); btn.disabled = false; }
         }
-        load();
+
+        init();
     </script></body></html>`);
 });
 
-// --- 2. ADMIN: ELITE MANAGEMENT (SECRET URL) ---
+// --- 3. ADMIN: THE COMMAND CENTER ---
 app.get('/admin', async (req, res) => {
     if (!req.session.admin) return res.redirect('/login');
     const b = await Buku.find().sort({_id:-1});
     const o = await Order.find({status:'Pending'});
     res.send(`<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"></script></head>
-    <body class="bg-[#0A0A0A] text-white p-8 font-sans">
-        <div class="max-w-6xl mx-auto">
-            <h1 class="text-3xl font-black mb-12 italic tracking-tighter">ELITE <span class="text-blue-500">CONTROL</span></h1>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                <div class="bg-[#111] p-8 rounded-[2rem] border border-white/5 h-fit">
-                    <h3 class="font-bold mb-6 text-blue-500 uppercase tracking-widest text-xs">Tambah Koleksi</h3>
-                    <div class="space-y-4">
-                        <input id="j" placeholder="Judul Literatur" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">
-                        <input id="p" placeholder="Penulis" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">
-                        <input id="h" type="number" placeholder="Investasi (Nominal)" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">
-                        <select id="g" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">${LIST_GENRE.map(g=>`<option>${g}</option>`).join('')}</select>
-                        <input type="file" id="fi" class="text-xs text-gray-500">
-                        <button onclick="saveB()" id="bs" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl">Simpan Koleksi</button>
-                    </div>
+    <body class="bg-[#0A0A0A] text-white p-10 font-sans">
+        <div class="max-w-6xl mx-auto flex justify-between items-center mb-16">
+            <h1 class="text-2xl font-black italic tracking-tighter uppercase">Command <span class="text-blue-500">Center</span></h1>
+            <a href="/" class="text-xs font-bold border-b border-blue-500">Back to Website</a>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div class="bg-[#111] p-8 rounded-[2.5rem] border border-white/5 h-fit">
+                <h3 class="font-black text-xs uppercase tracking-widest text-blue-500 mb-8">Tambah Koleksi</h3>
+                <div class="space-y-4">
+                    <input id="j" placeholder="Judul" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">
+                    <input id="p" placeholder="Penulis" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">
+                    <input id="h" type="number" placeholder="Nominal Investasi" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">
+                    <select id="g" class="w-full p-4 bg-black border border-white/10 rounded-2xl outline-none text-sm">${LIST_GENRE.map(g=>`<option>${g}</option>`).join('')}</select>
+                    <input type="file" id="cv" class="text-xs text-gray-500">
+                    <button onclick="saveB()" id="sbtn" class="w-full bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase shadow-xl mt-4">Simpan Koleksi</button>
                 </div>
+            </div>
 
-                <div class="lg:col-span-2">
-                    <h3 class="font-bold mb-6 text-blue-500 uppercase tracking-widest text-xs italic">Verifikasi Investasi (${o.length})</h3>
-                    <div class="space-y-8">
-                        ${o.map(x => `
-                        <div class="bg-[#111] p-8 rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row gap-8">
-                            <img src="${x.bukti}" class="w-full md:w-56 h-72 object-cover rounded-3xl border border-white/10" onerror="this.src='https://placehold.co/400x600/333/666?text=Bukti+Gagal+Muat'">
-                            <div class="flex-grow">
-                                <h4 class="text-2xl font-black mb-2 italic text-blue-500">Rp ${x.total.toLocaleString()}</h4>
-                                <p class="text-[10px] text-gray-500 mb-6 font-bold uppercase tracking-widest">${x.items.map(i=>i.judul).join(' • ')}</p>
-                                <input id="link-${x._id}" placeholder="Link MediaFire" class="w-full p-4 bg-black border border-blue-900 rounded-2xl mb-4 text-xs">
-                                <div class="flex gap-3">
-                                    <button onclick="acc('${x._id}')" class="flex-grow bg-blue-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg">Setujui</button>
-                                    <button onclick="delO('${x._id}')" class="bg-red-900/20 text-red-500 px-6 rounded-2xl font-black text-xs">X</button>
-                                </div>
-                            </div>
-                        </div>`).join('') || '<p class="text-gray-600 italic py-20 text-center border border-dashed border-white/5 rounded-3xl">Antrean verifikasi kosong.</p>'}
+            <div class="lg:col-span-2 space-y-6">
+                <h3 class="font-black text-xs uppercase tracking-widest text-blue-500 mb-8 italic">Antrean Verifikasi (${o.length})</h3>
+                ${o.map(x => `
+                <div class="bg-[#111] p-8 rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row gap-8">
+                    <div class="cursor-zoom-in" onclick="window.open('${x.bukti}')">
+                        <img src="${x.bukti}" class="w-full md:w-52 h-72 object-cover rounded-3xl border border-white/10">
                     </div>
-                </div>
+                    <div class="flex-grow flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-2xl font-black text-blue-500 mb-2">Rp ${x.total.toLocaleString()}</h4>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase mb-8">${x.items.map(i=>i.judul).join(' • ')}</p>
+                        </div>
+                        <div class="space-y-4">
+                            <input id="link-${x._id}" placeholder="Link MediaFire" class="w-full p-4 bg-black border border-blue-900 rounded-2xl text-xs outline-none">
+                            <div class="flex gap-2">
+                                <button onclick="acc('${x._id}')" class="flex-grow bg-blue-600 text-white py-4 rounded-2xl font-black text-xs uppercase">Approve</button>
+                                <button onclick="delO('${x._id}')" class="bg-red-900/10 text-red-500 px-6 rounded-2xl font-black text-xs">X</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`).join('') || '<p class="text-center py-20 text-gray-600 italic">Antrean sedang kosong...</p>'}
             </div>
         </div>
         <script>
             async function saveB(){
-                const f = document.getElementById('fi').files[0]; if(!f) return alert("Cover diperlukan.");
-                const btn = document.getElementById('bs'); btn.disabled = true; btn.innerText = "UPLOADING...";
+                const f = document.getElementById('cv').files[0]; if(!f) return alert("Pilih cover!");
+                const btn = document.getElementById('sbtn'); btn.disabled = true; btn.innerText = "UP...";
                 const fd = new FormData(); fd.append('file', f); fd.append('upload_preset', 'ml_default');
                 const up = await (await fetch('https://api.cloudinary.com/v1_1/dxtp7vsqy/image/upload',{method:'POST',body:fd})).json();
                 await fetch('/admin/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({judul:document.getElementById('j').value, penulis:document.getElementById('p').value, investasi:Number(document.getElementById('h').value), genre:document.getElementById('g').value, gambar:up.secure_url})});
                 location.reload();
             }
             async function acc(id){
-                const link = document.getElementById('link-'+id).value; if(!link) return alert("Link MediaFire wajib diisi.");
+                const link = document.getElementById('link-'+id).value; if(!link) return alert("Link wajib.");
                 await fetch('/admin/approve/'+id, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({downloadLink: link}) });
-                alert("Akses Instan dikirim."); location.reload();
+                alert("Approved!"); location.reload();
             }
-            async function delO(id){ if(confirm('Tolak?')) { await fetch('/admin/del-order/'+id,{method:'DELETE'}); location.reload(); } }
+            async function delO(id){ if(confirm('Hapus?')){ await fetch('/admin/del-order/'+id,{method:'DELETE'}); location.reload(); } }
         </script>
     </body></html>`);
 });
 
-// --- API & LOGIN (HIDDEN SECURITY) ---
-app.get('/login', (req, res) => { res.send(`<!DOCTYPE html><html><body style="background:#0A0A0A; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif;"><form action="/login" method="POST" style="text-align:center;"><input name="pw" type="password" placeholder="Elite Access Code" style="padding:20px; border-radius:15px; border:1px solid #333; background:#111; color:white; width:250px; text-align:center; margin-bottom:15px;"><br><button style="color:#007AFF; font-weight:900; background:none; border:none; cursor:pointer;">VERIFY ACCESS</button></form></body></html>`); });
+// --- API & LOGIN (SECURE) ---
+app.get('/login', (req, res) => { res.send(`<!DOCTYPE html><html><body style="background:#0A0A0A; display:flex; align-items:center; justify-content:center; height:100vh;"><form action="/login" method="POST" style="text-align:center;"><input name="pw" type="password" placeholder="Passcode" style="padding:20px; border-radius:15px; border:1px solid #333; background:#111; color:white; text-align:center; width:250px;"><br><button style="margin-top:20px; color:#007AFF; font-weight:900; background:none; border:none; cursor:pointer;">VERIFY IDENTITY</button></form></body></html>`); });
 app.post('/login', (req, res) => { if (req.body.pw === 'JESTRI0301209') req.session.admin = true; res.redirect('/admin'); });
 app.post('/admin/save', async (req, res) => { if(req.session.admin) await new Buku(req.body).save(); res.json({ok:true}); });
 app.post('/admin/approve/:id', async (req, res) => { if(req.session.admin) await Order.findByIdAndUpdate(req.params.id, { status: 'Approved', downloadLink: req.body.downloadLink }); res.json({ok:true}); });
